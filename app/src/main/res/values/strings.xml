@@ -1,0 +1,64 @@
+<resources>
+    <string name="app_name">Мои Дневники</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Мои Дневники</string>
+    <string name="add_entry">Добавить запись</string>
+    <string name="today_expenses">Траты сегодня</string>
+
+    <!-- Empty State -->
+    <string name="empty_state_title">Записей пока нет</string>
+    <string name="empty_state_subtitle">Нажмите + чтобы создать первую запись</string>
+
+    <!-- Editor Screen -->
+    <string name="new_entry">Новая запись</string>
+    <string name="edit_entry">Редактирование</string>
+    <string name="back">Назад</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="close">Закрыть</string>
+    <string name="title_label">Заголовок</string>
+    <string name="title_placeholder">Придумайте заголовок…</string>
+    <string name="content_label">Что произошло сегодня?</string>
+    <string name="content_placeholder">Напишите о своём дне…</string>
+
+    <!-- Photos -->
+    <string name="add_photo">Добавить фото</string>
+    <string name="add_photos">Добавить фото</string>
+    <string name="photos_count">Фото (%1$d/%2$d)</string>
+    <string name="take_photo">Сделать фото</string>
+    <string name="choose_from_gallery">Выбрать из галереи</string>
+    <string name="remove_photo">Удалить фото</string>
+    <string name="photo">Фото</string>
+    <string name="add">Добавить</string>
+
+    <!-- Diary Entry Card -->
+    <string name="delete_entry">Удалить запись</string>
+
+    <!-- Date Group Header -->
+    <string name="entry_count_one">1 запись</string>
+    <string name="entry_count_few">%d записи</string>
+    <string name="entry_count_many">%d записей</string>
+    <string name="expense_count_one">1 трата</string>
+    <string name="expense_count_few">%d траты</string>
+    <string name="expense_count_many">%d трат</string>
+    <string name="no_items">пусто</string>
+    <string name="collapse">Свернуть</string>
+    <string name="expand">Развернуть</string>
+
+    <!-- Action Choice Dialog -->
+    <string name="choose_action">Выберите действие</string>
+    <string name="new_entry_description">Создать запись в дневнике</string>
+    <string name="add_expense_description">Добавить расход за день</string>
+
+    <!-- Expense -->
+    <string name="add_expense">Добавить трату</string>
+    <string name="expense_amount">Сумма</string>
+    <string name="expense_category">Категория</string>
+    <string name="expense_description">Описание</string>
+    <string name="expense_description_hint">Необязательно</string>
+    <string name="delete_expense">Удалить трату</string>
+    <string name="expenses_for_day">Траты за день</string>
+    <string name="expense_list">Список трат</string>
+    <string name="view_expenses">Посмотреть траты</string>
+</resources>

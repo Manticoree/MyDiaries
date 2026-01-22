@@ -1,0 +1,51 @@
+package ru.diaries.mydiaries.di
+
+import android.content.Context
+import androidx.room.Room
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import ru.diaries.mydiaries.data.local.DiaryDatabase
+import ru.diaries.mydiaries.data.local.dao.DiaryDao
+import ru.diaries.mydiaries.data.local.dao.ExpenseDao
+import ru.diaries.mydiaries.data.local.dao.PhotoDao
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideDatabase(
+        @ApplicationContext context: Context
+    ): DiaryDatabase {
+        return Room.databaseBuilder(
+            context,
+            DiaryDatabase::class.java,
+            "diary_database"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDiaryDao(database: DiaryDatabase): DiaryDao {
+        return database.diaryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePhotoDao(database: DiaryDatabase): PhotoDao {
+        return database.photoDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideExpenseDao(database: DiaryDatabase): ExpenseDao {
+        return database.expenseDao()
+    }
+}
