@@ -84,8 +84,7 @@ fun ExpenseStatsDialog(
                 ExpensePieChart(
                     expenses = expenses,
                     modifier = Modifier.fillMaxWidth(),
-                    size = 180.dp,
-                    strokeWidth = 28.dp
+                    size = 180.dp
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

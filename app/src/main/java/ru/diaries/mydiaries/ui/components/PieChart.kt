@@ -22,11 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -46,7 +42,6 @@ fun ExpensePieChart(
     expenses: List<Expense>,
     modifier: Modifier = Modifier,
     size: Dp = 160.dp,
-    strokeWidth: Dp = 24.dp,
     showLegend: Boolean = true,
     animationDuration: Int = 800
 ) {
@@ -55,8 +50,7 @@ fun ExpensePieChart(
     if (total == 0.0 || expenses.isEmpty()) {
         EmptyPieChart(
             modifier = modifier,
-            size = size,
-            strokeWidth = strokeWidth
+            size = size
         )
         return
     }
@@ -92,10 +86,6 @@ fun ExpensePieChart(
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.size(size)) {
-                val canvasSize = this.size.minDimension
-                val radius = (canvasSize - strokeWidth.toPx()) / 2
-                val centerOffset = Offset(canvasSize / 2, canvasSize / 2)
-
                 var startAngle = -90f
 
                 chartData.forEach { data ->
@@ -105,16 +95,7 @@ fun ExpensePieChart(
                         color = data.category.color,
                         startAngle = startAngle,
                         sweepAngle = sweepAngle,
-                        useCenter = false,
-                        topLeft = Offset(
-                            centerOffset.x - radius,
-                            centerOffset.y - radius
-                        ),
-                        size = Size(radius * 2, radius * 2),
-                        style = Stroke(
-                            width = strokeWidth.toPx(),
-                            cap = StrokeCap.Round
-                        )
+                        useCenter = true
                     )
 
                     startAngle += sweepAngle
@@ -148,8 +129,7 @@ fun ExpensePieChart(
 @Composable
 private fun EmptyPieChart(
     modifier: Modifier = Modifier,
-    size: Dp = 160.dp,
-    strokeWidth: Dp = 24.dp
+    size: Dp = 160.dp
 ) {
     val emptyColor = MaterialTheme.colorScheme.surfaceVariant
 
@@ -162,24 +142,11 @@ private fun EmptyPieChart(
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.size(size)) {
-                val canvasSize = this.size.minDimension
-                val radius = (canvasSize - strokeWidth.toPx()) / 2
-                val centerOffset = Offset(canvasSize / 2, canvasSize / 2)
-
                 drawArc(
                     color = emptyColor,
                     startAngle = 0f,
                     sweepAngle = 360f,
-                    useCenter = false,
-                    topLeft = Offset(
-                        centerOffset.x - radius,
-                        centerOffset.y - radius
-                    ),
-                    size = Size(radius * 2, radius * 2),
-                    style = Stroke(
-                        width = strokeWidth.toPx(),
-                        cap = StrokeCap.Round
-                    )
+                    useCenter = true
                 )
             }
 
@@ -262,26 +229,18 @@ private fun LegendItem(
 fun MiniPieChart(
     expenses: List<Expense>,
     modifier: Modifier = Modifier,
-    size: Dp = 48.dp,
-    strokeWidth: Dp = 8.dp
+    size: Dp = 48.dp
 ) {
     val total = expenses.sumOf { it.amount }
 
     if (total == 0.0 || expenses.isEmpty()) {
         val emptyColor = MaterialTheme.colorScheme.surfaceVariant
         Canvas(modifier = modifier.size(size)) {
-            val canvasSize = this.size.minDimension
-            val radius = (canvasSize - strokeWidth.toPx()) / 2
-            val centerOffset = Offset(canvasSize / 2, canvasSize / 2)
-
             drawArc(
                 color = emptyColor,
                 startAngle = 0f,
                 sweepAngle = 360f,
-                useCenter = false,
-                topLeft = Offset(centerOffset.x - radius, centerOffset.y - radius),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round)
+                useCenter = true
             )
         }
         return
@@ -300,10 +259,6 @@ fun MiniPieChart(
         .sortedByDescending { it.amount }
 
     Canvas(modifier = modifier.size(size)) {
-        val canvasSize = this.size.minDimension
-        val radius = (canvasSize - strokeWidth.toPx()) / 2
-        val centerOffset = Offset(canvasSize / 2, canvasSize / 2)
-
         var startAngle = -90f
 
         chartData.forEach { data ->
@@ -313,10 +268,7 @@ fun MiniPieChart(
                 color = data.category.color,
                 startAngle = startAngle,
                 sweepAngle = sweepAngle,
-                useCenter = false,
-                topLeft = Offset(centerOffset.x - radius, centerOffset.y - radius),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round)
+                useCenter = true
             )
 
             startAngle += sweepAngle

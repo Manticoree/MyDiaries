@@ -1,6 +1,7 @@
 package ru.diaries.mydiaries.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,75 +36,129 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun ExpenseCard(
-    expense: Expense,
-    onDelete: () -> Unit,
+fun DayExpensesCard(
+    expenses: List<Expense>,
+    onDeleteExpense: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (expenses.isEmpty()) return
+
+    val total = expenses.sumOf { it.amount }
+
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = expense.category.color.copy(alpha = 0.1f)
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(expense.category.color.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clip(CircleShape)
-                        .background(expense.category.color)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = expense.category.displayName,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = expense.category.color,
-                    fontWeight = FontWeight.Medium
+                    text = stringResource(R.string.expenses_for_day),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = formatCurrency(expense.amount),
+                    text = formatCurrency(total),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (expense.description.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = expense.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            expenses.forEachIndexed { index, expense ->
+                ExpenseItem(
+                    expense = expense,
+                    onDelete = { onDeleteExpense(expense.id) }
+                )
+                if (index < expenses.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
                 }
             }
+        }
+    }
+}
 
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete_expense),
-                    tint = MaterialTheme.colorScheme.error
+@Composable
+private fun ExpenseItem(
+    expense: Expense,
+    onDelete: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(expense.category.color.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(expense.category.color)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = expense.category.displayName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = formatCurrency(expense.amount),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
+            if (expense.description.isNotBlank()) {
+                Text(
+                    text = expense.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = stringResource(R.string.delete_expense),
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }

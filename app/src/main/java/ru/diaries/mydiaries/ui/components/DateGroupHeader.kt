@@ -13,12 +13,17 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,10 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.diaries.mydiaries.R
+import ru.diaries.mydiaries.ui.theme.DateHeaderStyle
+import ru.diaries.mydiaries.ui.theme.SageGreen
+import ru.diaries.mydiaries.ui.theme.WarmBrown
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -72,9 +81,9 @@ fun DateGroupHeader(
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isExpanded) {
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
         } else {
-            MaterialTheme.colorScheme.surfaceVariant
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
         },
         animationSpec = tween(durationMillis = 300),
         label = "background_color"
@@ -101,15 +110,23 @@ fun DateGroupHeader(
     )
 
     val elevation by animateDpAsState(
-        targetValue = if (isExpanded) 2.dp else 1.dp,
+        targetValue = if (isExpanded) 2.dp else 0.dp,
         animationSpec = tween(durationMillis = 300),
         label = "elevation"
     )
 
-    val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
-        .withLocale(Locale.getDefault())
-
+    // Format date with relative names for Today/Yesterday
+    val dateText = getRelativeDateText(date)
     val countText = buildCountText(entryCount, expenseCount)
+
+    // Decorative line gradient
+    val lineGradient = Brush.horizontalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+        )
+    )
 
     Surface(
         modifier = modifier
@@ -124,6 +141,7 @@ fun DateGroupHeader(
                 onClick = onClick
             ),
         color = backgroundColor,
+        shape = RoundedCornerShape(12.dp),
         tonalElevation = elevation
     ) {
         Row(
@@ -133,20 +151,41 @@ fun DateGroupHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Left decorative line
+            Box(
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(1.dp)
+                    .background(lineGradient)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Calendar icon
+            Icon(
+                imageVector = Icons.Outlined.CalendarToday,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Date and count
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = date.format(dateFormatter),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = dateText,
+                    style = DateHeaderStyle,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "•",
+                    text = "\u2022",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
                 Text(
                     text = countText,
@@ -155,6 +194,17 @@ fun DateGroupHeader(
                 )
             }
 
+            // Right decorative line
+            Box(
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(1.dp)
+                    .background(lineGradient)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Expand/collapse button
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -176,6 +226,22 @@ fun DateGroupHeader(
                         }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun getRelativeDateText(date: LocalDate): String {
+    val today = LocalDate.now()
+    val yesterday = today.minusDays(1)
+
+    return when (date) {
+        today -> stringResource(R.string.date_today)
+        yesterday -> stringResource(R.string.date_yesterday)
+        else -> {
+            val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
+                .withLocale(Locale.getDefault())
+            date.format(formatter)
         }
     }
 }

@@ -8,6 +8,9 @@ data class DateGroup(
     val isExpanded: Boolean = true
 ) {
     val entryCount: Int get() = items.count { it is TimelineItem.DiaryItem }
-    val expenseCount: Int get() = items.count { it is TimelineItem.ExpenseItem }
+    val expenseCount: Int get() = items.filterIsInstance<TimelineItem.ExpensesItem>()
+        .sumOf { it.expenses.size }
+    val taskCount: Int get() = items.filterIsInstance<TimelineItem.TasksItem>()
+        .sumOf { it.tasks.size }
     val totalCount: Int get() = items.size
 }

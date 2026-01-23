@@ -48,6 +48,8 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    implementation(project(":feature:todo"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

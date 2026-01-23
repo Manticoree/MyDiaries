@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "MyDiaries"
 include(":app")
+include(":feature:todo")
  

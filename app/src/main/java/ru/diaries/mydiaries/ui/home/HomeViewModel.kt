@@ -15,13 +15,17 @@ import ru.diaries.mydiaries.data.model.Expense
 import ru.diaries.mydiaries.data.model.ExpenseCategory
 import ru.diaries.mydiaries.data.repository.DiaryRepository
 import ru.diaries.mydiaries.data.repository.ExpenseRepository
+import ru.diaries.mydiaries.feature.todo.data.model.Task
+import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository
 import java.time.LocalDate
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: DiaryRepository,
-    private val expenseRepository: ExpenseRepository
+    private val expenseRepository: ExpenseRepository,
+    private val taskRepository: TaskRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -53,6 +57,15 @@ class HomeViewModel @Inject constructor(
             is HomeIntent.ExpenseDescriptionChanged -> updateExpenseDescription(intent.description)
             is HomeIntent.SaveExpense -> saveExpense()
             is HomeIntent.DeleteExpense -> deleteExpense(intent.id)
+
+            is HomeIntent.ShowAddTaskDialog -> showAddTaskDialog()
+            is HomeIntent.HideAddTaskDialog -> hideAddTaskDialog()
+            is HomeIntent.TaskTitleChanged -> updateTaskTitle(intent.index, intent.title)
+            is HomeIntent.AddTaskField -> addTaskField()
+            is HomeIntent.RemoveTaskField -> removeTaskField(intent.index)
+            is HomeIntent.SaveTasks -> saveTasks()
+            is HomeIntent.ToggleTaskCompletion -> toggleTaskCompletion(intent.taskId, intent.isCompleted)
+            is HomeIntent.DeleteTask -> deleteTask(intent.id)
         }
     }
 
@@ -60,22 +73,25 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 repository.getEntries(),
-                expenseRepository.getAllExpenses()
-            ) { entries, expenses ->
-                Pair(entries, expenses)
+                expenseRepository.getAllExpenses(),
+                taskRepository.getAllTasks()
+            ) { entries, expenses, tasks ->
+                Triple(entries, expenses, tasks)
             }
                 .catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
-                .collect { (entries, expenses) ->
+                .collect { (entries, expenses, tasks) ->
                     val sortedEntries = entries.sortedByDescending { it.date }
-                    val grouped = groupItemsByDate(sortedEntries, expenses)
+                    val grouped = groupItemsByDate(sortedEntries, expenses, tasks)
                     val todayExpenses = expenses.filter { it.date == LocalDate.now() }
+                    val todayTasks = tasks.filter { it.date == LocalDate.now() }
                     _state.update {
                         it.copy(
                             entries = sortedEntries,
                             groupedEntries = grouped,
                             todayExpenses = todayExpenses,
+                            todayTasks = todayTasks,
                             isLoading = false
                         )
                     }
@@ -115,30 +131,37 @@ class HomeViewModel @Inject constructor(
 
     private fun groupItemsByDate(
         entries: List<DiaryEntry>,
-        expenses: List<Expense>
+        expenses: List<Expense>,
+        tasks: List<Task> = emptyList()
     ): List<DateGroup> {
-        val diaryItems = entries.map { TimelineItem.DiaryItem(it) }
-        val expenseItems = expenses.map { TimelineItem.ExpenseItem(it) }
-        val allItems = diaryItems + expenseItems
+        val allDates = (entries.map { it.date } + expenses.map { it.date } + tasks.map { it.date }).distinct()
 
-        return allItems
-            .groupBy { it.date }
-            .map { (date, itemsForDate) ->
-                val existingGroup = _state.value.groupedEntries.find { it.date == date }
-                DateGroup(
-                    date = date,
-                    items = itemsForDate.sortedWith(
-                        compareBy<TimelineItem> { item ->
-                            when (item) {
-                                is TimelineItem.DiaryItem -> 0
-                                is TimelineItem.ExpenseItem -> 1
-                            }
-                        }
-                    ),
-                    isExpanded = existingGroup?.isExpanded ?: true
-                )
+        return allDates.map { date ->
+            val diaryItems = entries
+                .filter { it.date == date }
+                .map { TimelineItem.DiaryItem(it) }
+
+            val dayExpenses = expenses.filter { it.date == date }
+            val expensesItem = if (dayExpenses.isNotEmpty()) {
+                listOf(TimelineItem.ExpensesItem(dayExpenses))
+            } else {
+                emptyList()
             }
-            .sortedByDescending { it.date }
+
+            val dayTasks = tasks.filter { it.date == date }
+            val tasksItem = if (dayTasks.isNotEmpty()) {
+                listOf(TimelineItem.TasksItem(dayTasks))
+            } else {
+                emptyList()
+            }
+
+            val existingGroup = _state.value.groupedEntries.find { it.date == date }
+            DateGroup(
+                date = date,
+                items = tasksItem + diaryItems + expensesItem,
+                isExpanded = existingGroup?.isExpanded ?: true
+            )
+        }.sortedByDescending { it.date }
     }
 
     private fun toggleDateGroup(date: LocalDate) {
@@ -228,6 +251,83 @@ class HomeViewModel @Inject constructor(
     private fun deleteExpense(id: String) {
         viewModelScope.launch {
             expenseRepository.deleteExpense(id)
+        }
+    }
+
+    private fun showAddTaskDialog() {
+        _state.update {
+            it.copy(
+                showAddTaskDialog = true,
+                newTaskTitles = listOf("")
+            )
+        }
+    }
+
+    private fun hideAddTaskDialog() {
+        _state.update {
+            it.copy(
+                showAddTaskDialog = false,
+                newTaskTitles = listOf("")
+            )
+        }
+    }
+
+    private fun updateTaskTitle(index: Int, title: String) {
+        _state.update { currentState ->
+            val updatedTitles = currentState.newTaskTitles.toMutableList()
+            if (index in updatedTitles.indices) {
+                updatedTitles[index] = title
+            }
+            currentState.copy(newTaskTitles = updatedTitles)
+        }
+    }
+
+    private fun addTaskField() {
+        _state.update { currentState ->
+            currentState.copy(newTaskTitles = currentState.newTaskTitles + "")
+        }
+    }
+
+    private fun removeTaskField(index: Int) {
+        _state.update { currentState ->
+            val updatedTitles = currentState.newTaskTitles.toMutableList()
+            if (updatedTitles.size > 1 && index in updatedTitles.indices) {
+                updatedTitles.removeAt(index)
+            }
+            currentState.copy(newTaskTitles = updatedTitles)
+        }
+    }
+
+    private fun saveTasks() {
+        val titles = _state.value.newTaskTitles
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+
+        if (titles.isEmpty()) return
+
+        viewModelScope.launch {
+            titles.forEach { title ->
+                val task = Task(
+                    id = UUID.randomUUID().toString(),
+                    title = title,
+                    isCompleted = false,
+                    date = LocalDate.now()
+                )
+                taskRepository.saveTask(task)
+            }
+            hideAddTaskDialog()
+        }
+    }
+
+    private fun toggleTaskCompletion(taskId: String, isCompleted: Boolean) {
+        viewModelScope.launch {
+            taskRepository.toggleTaskCompletion(taskId, isCompleted)
+        }
+    }
+
+    private fun deleteTask(id: String) {
+        viewModelScope.launch {
+            taskRepository.deleteTask(id)
         }
     }
 }

@@ -26,4 +26,14 @@ sealed class HomeIntent {
     data class ExpenseDescriptionChanged(val description: String) : HomeIntent()
     data object SaveExpense : HomeIntent()
     data class DeleteExpense(val id: String) : HomeIntent()
+
+    // Task
+    data object ShowAddTaskDialog : HomeIntent()
+    data object HideAddTaskDialog : HomeIntent()
+    data class TaskTitleChanged(val index: Int, val title: String) : HomeIntent()
+    data object AddTaskField : HomeIntent()
+    data class RemoveTaskField(val index: Int) : HomeIntent()
+    data object SaveTasks : HomeIntent()
+    data class ToggleTaskCompletion(val taskId: String, val isCompleted: Boolean) : HomeIntent()
+    data class DeleteTask(val id: String) : HomeIntent()
 }

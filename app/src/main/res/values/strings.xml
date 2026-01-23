@@ -6,9 +6,20 @@
     <string name="add_entry">Добавить запись</string>
     <string name="today_expenses">Траты сегодня</string>
 
+    <!-- Greetings -->
+    <string name="greeting_morning">Доброе утро!</string>
+    <string name="greeting_afternoon">Добрый день!</string>
+    <string name="greeting_evening">Добрый вечер!</string>
+    <string name="greeting_night">Доброй ночи!</string>
+
+    <!-- Relative dates -->
+    <string name="date_today">Сегодня</string>
+    <string name="date_yesterday">Вчера</string>
+
     <!-- Empty State -->
-    <string name="empty_state_title">Записей пока нет</string>
-    <string name="empty_state_subtitle">Нажмите + чтобы создать первую запись</string>
+    <string name="empty_state_title">Ваш дневник ждёт</string>
+    <string name="empty_state_subtitle">Нажмите + чтобы начать вести записи</string>
+    <string name="empty_state_hint">Каждый день — это новая история</string>
 
     <!-- Editor Screen -->
     <string name="new_entry">Новая запись</string>
@@ -25,9 +36,12 @@
     <!-- Photos -->
     <string name="add_photo">Добавить фото</string>
     <string name="add_photos">Добавить фото</string>
+    <string name="add_photos_hint">Нажмите, чтобы прикрепить изображения</string>
     <string name="photos_count">Фото (%1$d/%2$d)</string>
     <string name="take_photo">Сделать фото</string>
+    <string name="take_photo_description">Использовать камеру устройства</string>
     <string name="choose_from_gallery">Выбрать из галереи</string>
+    <string name="choose_from_gallery_description">Выбрать из сохранённых фото</string>
     <string name="remove_photo">Удалить фото</string>
     <string name="photo">Фото</string>
     <string name="add">Добавить</string>
@@ -47,7 +61,7 @@
     <string name="expand">Развернуть</string>
 
     <!-- Action Choice Dialog -->
-    <string name="choose_action">Выберите действие</string>
+    <string name="choose_action">Что хотите добавить?</string>
     <string name="new_entry_description">Создать запись в дневнике</string>
     <string name="add_expense_description">Добавить расход за день</string>
 
@@ -61,4 +75,21 @@
     <string name="expenses_for_day">Траты за день</string>
     <string name="expense_list">Список трат</string>
     <string name="view_expenses">Посмотреть траты</string>
+    <string name="view_details">Подробнее</string>
+
+    <!-- Currency -->
+    <string name="currency_format">%s ₽</string>
+
+    <!-- Tasks -->
+    <string name="add_task">Добавить задачу</string>
+    <string name="add_tasks">Добавить задачи</string>
+    <string name="add_task_description">Создать задачи на сегодня</string>
+    <string name="task_title">Задача</string>
+    <string name="task_title_placeholder">Что нужно сделать?</string>
+    <string name="tasks_for_day">Задачи на день</string>
+    <string name="delete_task">Удалить задачу</string>
+    <string name="task_completed">Выполнено</string>
+    <string name="task_completed_short">выполнено</string>
+    <string name="task_incomplete">Не выполнено</string>
+    <string name="add_more_task">Добавить ещё</string>
 </resources>

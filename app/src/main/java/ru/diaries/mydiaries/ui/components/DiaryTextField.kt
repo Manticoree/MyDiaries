@@ -22,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -46,7 +48,8 @@ fun DiaryTextField(
         imeAction = if (singleLine) ImeAction.Next else ImeAction.Default
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    focusRequester: FocusRequester? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -101,6 +104,13 @@ fun DiaryTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
+                .then(
+                    if (focusRequester != null) {
+                        Modifier.focusRequester(focusRequester)
+                    } else {
+                        Modifier
+                    }
+                )
                 .clip(shape)
                 .background(backgroundColor)
                 .border(borderWidth, borderColor, shape)
