@@ -22,7 +22,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.TaskAlt
+import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -55,6 +57,8 @@ fun ActionChoiceDialog(
     onAddEntry: () -> Unit,
     onAddExpense: () -> Unit,
     onAddTask: () -> Unit,
+    onAddVideo: () -> Unit,
+    onAddFood: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val animationProgress = remember { Animatable(0f) }
@@ -160,6 +164,32 @@ fun ActionChoiceDialog(
                     onClick = {
                         onDismiss()
                         onAddTask()
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ActionItemCard(
+                    icon = Icons.Outlined.Videocam,
+                    title = stringResource(R.string.add_video),
+                    subtitle = stringResource(R.string.add_video_description),
+                    gradientColors = listOf(Terracotta, LavenderMist),
+                    onClick = {
+                        onDismiss()
+                        onAddVideo()
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ActionItemCard(
+                    icon = Icons.Outlined.Restaurant,
+                    title = stringResource(R.string.add_food),
+                    subtitle = stringResource(R.string.add_food_description),
+                    gradientColors = listOf(SageGreen, GoldenHoney),
+                    onClick = {
+                        onDismiss()
+                        onAddFood()
                     }
                 )
             }

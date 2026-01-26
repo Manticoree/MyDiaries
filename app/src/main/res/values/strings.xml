@@ -92,4 +92,34 @@
     <string name="task_completed_short">выполнено</string>
     <string name="task_incomplete">Не выполнено</string>
     <string name="add_more_task">Добавить ещё</string>
+
+    <!-- Videos -->
+    <string name="add_video">Добавить видео</string>
+    <string name="add_video_description">Записать или выбрать видео</string>
+    <string name="record_video">Записать видео</string>
+    <string name="record_video_description">Использовать камеру устройства</string>
+    <string name="choose_video_from_gallery_description">Выбрать из сохранённых видео</string>
+    <string name="video_title_placeholder">Название видео (необязательно)</string>
+    <string name="videos_for_day">Видео за день</string>
+    <string name="delete_video">Удалить видео</string>
+    <string name="play_video">Воспроизвести видео</string>
+
+    <!-- Food -->
+    <string name="add_food">Добавить еду</string>
+    <string name="add_food_description">Распознать еду и калории</string>
+    <string name="food_card_title">Еда</string>
+    <string name="take_food_photo">Сфотографировать</string>
+    <string name="take_food_photo_description">Использовать камеру</string>
+    <string name="pick_food_photo">Из галереи</string>
+    <string name="pick_food_photo_description">Выбрать фото еды</string>
+    <string name="calories">Калории</string>
+    <string name="kcal">ккал</string>
+    <string name="serving_size">Размер порции</string>
+    <string name="recognized_as">Распознано как</string>
+    <string name="total_today">Всего за сегодня</string>
+    <string name="analyzing_food">Анализ…</string>
+    <string name="downloading_model">Загрузка модели…</string>
+    <string name="retry">Повторить</string>
+    <string name="food_for_day">Еда за день</string>
+    <string name="delete_food">Удалить</string>
 </resources>

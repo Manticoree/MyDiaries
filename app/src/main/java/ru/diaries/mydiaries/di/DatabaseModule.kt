@@ -10,8 +10,10 @@ import dagger.hilt.components.SingletonComponent
 import ru.diaries.mydiaries.data.local.DiaryDatabase
 import ru.diaries.mydiaries.data.local.dao.DiaryDao
 import ru.diaries.mydiaries.data.local.dao.ExpenseDao
+import ru.diaries.mydiaries.data.local.dao.FoodDao
 import ru.diaries.mydiaries.data.local.dao.PhotoDao
 import ru.diaries.mydiaries.data.local.dao.TaskDao
+import ru.diaries.mydiaries.data.local.dao.VideoDao
 import javax.inject.Singleton
 
 @Module
@@ -54,5 +56,17 @@ object DatabaseModule {
     @Singleton
     fun provideTaskDao(database: DiaryDatabase): TaskDao {
         return database.taskDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideVideoDao(database: DiaryDatabase): VideoDao {
+        return database.videoDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFoodDao(database: DiaryDatabase): FoodDao {
+        return database.foodDao()
     }
 }

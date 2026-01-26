@@ -1,8 +1,14 @@
 package ru.diaries.mydiaries.feature.todo.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.Card
@@ -34,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
@@ -47,6 +54,8 @@ fun DayTasksCard(
     onToggleTask: (String, Boolean) -> Unit,
     onDeleteTask: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isExpanded: Boolean = true,
+    onToggleExpand: () -> Unit = {},
     cardTitle: String = "Tasks",
     completedText: String = "completed"
 ) {
@@ -57,6 +66,12 @@ fun DayTasksCard(
     val sageGreen = Color(0xFF6B8E6B)
     val lavenderMist = Color(0xFF9B8AA8)
     val warmBrown = Color(0xFF8B7355)
+
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 0f else -90f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "rotation"
+    )
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -69,9 +84,11 @@ fun DayTasksCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header with icon and counter
+            // Header with icon and counter - clickable to expand/collapse
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggleExpand),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -122,22 +139,45 @@ fun DayTasksCard(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Expand/collapse icon
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .rotate(rotationAngle),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
-            if (tasks.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
+            // Animated content
+            AnimatedVisibility(
+                visible = isExpanded && tasks.isNotEmpty(),
+                enter = expandVertically(
+                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                ) + fadeIn(),
+                exit = shrinkVertically(
+                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                ) + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    tasks.forEach { task ->
-                        TaskItem(
-                            task = task,
-                            onToggle = { onToggleTask(task.id, !task.isCompleted) },
-                            onDelete = { onDeleteTask(task.id) },
-                            accentColor = sageGreen,
-                            warmBrown = warmBrown
-                        )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        tasks.forEach { task ->
+                            TaskItem(
+                                task = task,
+                                onToggle = { onToggleTask(task.id, !task.isCompleted) },
+                                onDelete = { onDeleteTask(task.id) },
+                                accentColor = sageGreen,
+                                warmBrown = warmBrown
+                            )
+                        }
                     }
                 }
             }
