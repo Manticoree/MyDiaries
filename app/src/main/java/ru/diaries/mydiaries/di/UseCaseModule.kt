@@ -10,10 +10,12 @@ import ru.diaries.mydiaries.data.repository.ExpenseRepository
 import ru.diaries.mydiaries.domain.usecase.expense.SaveExpenseUseCase
 import ru.diaries.mydiaries.domain.usecase.food.SaveFoodUseCase
 import ru.diaries.mydiaries.domain.usecase.task.SaveTasksUseCase
+import ru.diaries.mydiaries.domain.usecase.history.GetHistoryDataUseCase
 import ru.diaries.mydiaries.domain.usecase.timeline.GetTimelineItemsUseCase
 import ru.diaries.mydiaries.domain.usecase.video.SaveVideoUseCase
 import ru.diaries.mydiaries.feature.food.data.repository.FoodRepository
 import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository
+import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
 
 @Module
@@ -27,9 +29,23 @@ object UseCaseModule {
         expenseRepository: ExpenseRepository,
         taskRepository: TaskRepository,
         videoRepository: VideoRepository,
-        foodRepository: FoodRepository
+        foodRepository: FoodRepository,
+        trackRepository: TrackRepository
     ): GetTimelineItemsUseCase {
-        return GetTimelineItemsUseCase(diaryRepository, expenseRepository, taskRepository, videoRepository, foodRepository)
+        return GetTimelineItemsUseCase(diaryRepository, expenseRepository, taskRepository, videoRepository, foodRepository, trackRepository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetHistoryDataUseCase(
+        diaryRepository: DiaryRepository,
+        expenseRepository: ExpenseRepository,
+        taskRepository: TaskRepository,
+        videoRepository: VideoRepository,
+        foodRepository: FoodRepository,
+        trackRepository: TrackRepository
+    ): GetHistoryDataUseCase {
+        return GetHistoryDataUseCase(diaryRepository, expenseRepository, taskRepository, videoRepository, foodRepository, trackRepository)
     }
 
     @Provides

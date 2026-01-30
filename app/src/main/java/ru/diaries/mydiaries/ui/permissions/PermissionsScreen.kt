@@ -31,6 +31,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PhotoLibrary
@@ -410,6 +412,18 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
         )
     )
 
+    // Location
+    permissions.add(
+        PermissionItem(
+            permission = Manifest.permission.ACCESS_FINE_LOCATION,
+            icon = Icons.Outlined.LocationOn,
+            title = "Геолокация",
+            description = "Для записи маршрутов на карте",
+            isGranted = context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
+        )
+    )
+
     // Microphone
     permissions.add(
         PermissionItem(
@@ -421,6 +435,20 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
                     android.content.pm.PackageManager.PERMISSION_GRANTED
         )
     )
+
+    // Activity recognition (Android 10+)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        permissions.add(
+            PermissionItem(
+                permission = Manifest.permission.ACTIVITY_RECOGNITION,
+                icon = Icons.AutoMirrored.Outlined.DirectionsWalk,
+                title = "Физическая активность",
+                description = "Для подсчёта шагов",
+                isGranted = context.checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) ==
+                        android.content.pm.PackageManager.PERMISSION_GRANTED
+            )
+        )
+    }
 
     // Media permissions (Android 13+)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

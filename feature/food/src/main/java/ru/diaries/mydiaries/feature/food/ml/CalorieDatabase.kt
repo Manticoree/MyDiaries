@@ -1,5 +1,7 @@
 package ru.diaries.mydiaries.feature.food.ml
 
+import android.util.Log
+
 /**
  * Database mapping food labels to approximate calories per 100g.
  * Supports both Food-101 labels and Google AIY Vision Food model labels.
@@ -32,19 +34,49 @@ object CalorieDatabase {
      */
     fun getDisplayName(label: String): String {
         val normalizedLabel = label.lowercase().trim()
+        Log.d("CalorieDatabase", "Looking up: '$normalizedLabel'")
 
         // Check exact match
-        displayNames[normalizedLabel]?.let { return it }
+        displayNames[normalizedLabel]?.let {
+            Log.d("CalorieDatabase", "Found exact match: $it")
+            return it
+        }
 
-        // Check partial matches
+        // Try with underscores replaced by spaces
+        val withSpaces = normalizedLabel.replace("_", " ")
+        displayNames[withSpaces]?.let {
+            Log.d("CalorieDatabase", "Found with spaces: $it")
+            return it
+        }
+
+        // Try with spaces replaced by underscores
+        val withUnderscores = normalizedLabel.replace(" ", "_")
+        displayNames[withUnderscores]?.let {
+            Log.d("CalorieDatabase", "Found with underscores: $it")
+            return it
+        }
+
+        // Check partial matches (both directions)
         for ((key, name) in displayNames) {
-            if (normalizedLabel.contains(key)) {
+            if (normalizedLabel.contains(key) || key.contains(normalizedLabel)) {
+                Log.d("CalorieDatabase", "Found partial match: $key -> $name")
+                return name
+            }
+            // Also check with underscore/space variants
+            if (withSpaces.contains(key) || key.contains(withSpaces)) {
+                Log.d("CalorieDatabase", "Found partial (spaces): $key -> $name")
+                return name
+            }
+            if (withUnderscores.contains(key) || key.contains(withUnderscores)) {
+                Log.d("CalorieDatabase", "Found partial (underscores): $key -> $name")
                 return name
             }
         }
 
-        // Format label as display name
-        return formatLabelForDisplay(label)
+        // Format label as display name (capitalize words)
+        val formatted = formatLabelForDisplay(label)
+        Log.d("CalorieDatabase", "No match found, formatting: $formatted")
+        return formatted
     }
 
     private fun estimateCaloriesByCategory(label: String): Int {

@@ -11,10 +11,13 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,7 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,8 +38,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -53,6 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
@@ -81,6 +84,9 @@ import ru.diaries.mydiaries.feature.todo.ui.DayTasksCard
 import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.food.ui.AddFoodDialog
 import ru.diaries.mydiaries.feature.food.ui.DayFoodCard
+import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
+import ru.diaries.mydiaries.feature.track.ui.DayTrackCard
+import ru.diaries.mydiaries.feature.track.ui.FullScreenMapDialog
 import ru.diaries.mydiaries.feature.video.data.model.Video
 import ru.diaries.mydiaries.feature.video.ui.AddVideoDialog
 import ru.diaries.mydiaries.feature.video.ui.DayVideosCard
@@ -92,54 +98,59 @@ import ru.diaries.mydiaries.ui.video.AddVideoDialogEffect
 import ru.diaries.mydiaries.ui.video.AddVideoDialogIntent
 import ru.diaries.mydiaries.ui.video.AddVideoDialogViewModel
 import ru.diaries.mydiaries.ui.theme.GoldenHoney
-import ru.diaries.mydiaries.ui.theme.GreetingStyle
-import ru.diaries.mydiaries.ui.theme.NumberLargeStyle
+import ru.diaries.mydiaries.ui.theme.NumberStyle
+import ru.diaries.mydiaries.ui.theme.SageGreen
 import ru.diaries.mydiaries.ui.theme.Terracotta
 import ru.diaries.mydiaries.ui.theme.WarmBrown
 import java.text.NumberFormat
 import java.time.LocalDate
-import java.time.LocalTime
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimelineScreen(
-    viewModel: TimelineViewModel = hiltViewModel()
+    viewModel: TimelineViewModel = hiltViewModel(),
+    showFab: Boolean = true
 ) {
     val state by viewModel.state.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            MediumTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.home_title),
-                        style = MaterialTheme.typography.titleLarge
+                        text = stringResource(R.string.home_title)
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.handleIntent(TimelineIntent.ShowActionChoiceDialog) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape,
-                modifier = Modifier
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = CircleShape,
-                        spotColor = WarmBrown.copy(alpha = 0.3f)
+            if (showFab) {
+                FloatingActionButton(
+                    onClick = { viewModel.handleIntent(TimelineIntent.ShowActionChoiceDialog) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CircleShape,
+                            spotColor = WarmBrown.copy(alpha = 0.3f)
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.add_entry)
                     )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.add_entry)
-                )
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -160,10 +171,12 @@ fun TimelineScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        item(key = "expense_card") {
-                            TodayExpenseCard(
+                        item(key = "summary_row") {
+                            TodaySummaryRow(
                                 expenses = state.todayExpenses,
-                                onClick = { viewModel.handleIntent(TimelineIntent.ShowExpenseStatsDialog) }
+                                steps = state.todaySteps,
+                                isStepCounterRunning = state.isStepCounterRunning,
+                                onExpenseClick = { viewModel.handleIntent(TimelineIntent.ShowExpenseStatsDialog) }
                             )
                         }
 
@@ -216,6 +229,12 @@ fun TimelineScreen(
                                         onDeleteFood = { foodId ->
                                             viewModel.handleIntent(TimelineIntent.DeleteFood(foodId))
                                         },
+                                        onTrackMapClick = { track ->
+                                            viewModel.handleIntent(TimelineIntent.OpenTrackMap(track))
+                                        },
+                                        onDeleteTrack = { trackId ->
+                                            viewModel.handleIntent(TimelineIntent.DeleteTrack(trackId))
+                                        },
                                         isCardExpanded = { cardId -> state.isCardExpanded(cardId) },
                                         onToggleCardExpansion = { cardId ->
                                             viewModel.handleIntent(TimelineIntent.ToggleCardExpansion(cardId))
@@ -260,6 +279,8 @@ fun TimelineScreen(
             onAddTask = { viewModel.handleIntent(TimelineIntent.ShowAddTaskDialog) },
             onAddVideo = { viewModel.handleIntent(TimelineIntent.ShowAddVideoDialog) },
             onAddFood = { viewModel.handleIntent(TimelineIntent.ShowAddFoodDialog) },
+            onToggleTracking = { viewModel.handleIntent(TimelineIntent.ToggleTracking) },
+            isTracking = state.isTracking,
             onDismiss = { viewModel.handleIntent(TimelineIntent.HideActionChoiceDialog) }
         )
     }
@@ -318,6 +339,27 @@ fun TimelineScreen(
             AddFoodDialogWithViewModel(
                 onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) },
                 onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) }
+            )
+        }
+    }
+
+    // Full Screen Map Dialog
+    state.fullMapTrack?.let { track ->
+        if (state.showFullMapDialog) {
+            FullScreenMapDialog(
+                track = track,
+                isTracking = state.isTracking,
+                onToggleTracking = { viewModel.handleIntent(TimelineIntent.ToggleTracking) },
+                onDismiss = { viewModel.handleIntent(TimelineIntent.CloseTrackMap) },
+                titleText = stringResource(R.string.full_map),
+                startTrackingText = stringResource(R.string.start_tracking),
+                stopTrackingText = stringResource(R.string.stop_tracking),
+                distanceLabel = stringResource(R.string.track_distance),
+                durationLabel = stringResource(R.string.track_duration),
+                speedLabel = stringResource(R.string.track_avg_speed),
+                stepsLabel = stringResource(R.string.track_steps),
+                kmUnit = stringResource(R.string.track_km),
+                kmhUnit = stringResource(R.string.track_kmh)
             )
         }
     }
@@ -603,128 +645,206 @@ private fun extractVideoThumbnail(context: android.content.Context, uri: android
 }
 
 @Composable
-private fun TodayExpenseCard(
+private fun TodaySummaryRow(
     expenses: List<ru.diaries.mydiaries.data.model.Expense>,
-    onClick: () -> Unit
+    steps: Int,
+    isStepCounterRunning: Boolean,
+    onExpenseClick: () -> Unit
 ) {
     val total = expenses.sumOf { it.amount }
-    val greeting = getGreetingByTimeOfDay()
+    val numberFormat = NumberFormat.getInstance(Locale("ru", "RU"))
+    val stepGoal = 10_000
+    val progress = (steps.toFloat() / stepGoal).coerceIn(0f, 1f)
 
-    val headerGradient = Brush.horizontalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-        )
-    )
-
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .shadow(
-                elevation = 6.dp,
-                shape = RoundedCornerShape(20.dp),
-                spotColor = WarmBrown.copy(alpha = 0.15f),
-                ambientColor = WarmBrown.copy(alpha = 0.08f)
-            ),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
-        ),
-        onClick = onClick
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(headerGradient)
-                    .padding(horizontal = 20.dp, vertical = 14.dp)
-            ) {
-                Text(
-                    text = greeting,
-                    style = GreetingStyle,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        // Expense card
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    spotColor = Terracotta.copy(alpha = 0.15f),
+                    ambientColor = Terracotta.copy(alpha = 0.06f)
+                ),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            onClick = onExpenseClick
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Accent stripe
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .shadow(
-                            elevation = 4.dp,
-                            shape = CircleShape,
-                            spotColor = WarmBrown.copy(alpha = 0.1f)
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(Terracotta, GoldenHoney)
+                            )
                         )
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    MiniPieChart(
-                        expenses = expenses,
-                        size = 48.dp
-                    )
-                }
+                )
 
-                Spacer(modifier = Modifier.width(20.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.today_expenses),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = formatCurrency(total),
-                        style = NumberLargeStyle,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(14.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.view_details),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            text = "\uD83D\uDCB0",
+                            style = MaterialTheme.typography.titleSmall
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Outlined.ChevronRight,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.today_expenses),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Text(
+                        text = formatCurrency(total),
+                        style = NumberStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    // Category mini-chart row
+                    Row(
+                        modifier = Modifier.padding(top = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            MiniPieChart(
+                                expenses = expenses,
+                                size = 22.dp
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.view_details),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Terracotta
                         )
                     }
                 }
             }
         }
-    }
-}
 
-@Composable
-private fun getGreetingByTimeOfDay(): String {
-    val currentHour = LocalTime.now().hour
-    return when (currentHour) {
-        in 5..11 -> stringResource(R.string.greeting_morning)
-        in 12..17 -> stringResource(R.string.greeting_afternoon)
-        in 18..22 -> stringResource(R.string.greeting_evening)
-        else -> stringResource(R.string.greeting_night)
+        // Steps card
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    spotColor = SageGreen.copy(alpha = 0.15f),
+                    ambientColor = SageGreen.copy(alpha = 0.06f)
+                ),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Accent stripe
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(SageGreen, GoldenHoney)
+                            )
+                        )
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(14.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "\uD83D\uDEB6",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.steps_today),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Text(
+                        text = numberFormat.format(steps),
+                        style = NumberStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    // Progress bar + label
+                    Column(modifier = Modifier.padding(top = 6.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(progress)
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(SageGreen, GoldenHoney)
+                                        )
+                                    )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = stringResource(
+                                R.string.step_goal_progress,
+                                numberFormat.format(steps),
+                                numberFormat.format(stepGoal)
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -745,6 +865,8 @@ private fun AnimatedItemsColumn(
     onVideoClick: (Video) -> Unit = {},
     onDeleteVideo: (String) -> Unit = {},
     onDeleteFood: (String) -> Unit = {},
+    onTrackMapClick: (DailyTrack) -> Unit = {},
+    onDeleteTrack: (String) -> Unit = {},
     isCardExpanded: (String) -> Boolean = { true },
     onToggleCardExpansion: (String) -> Unit = {}
 ) {
@@ -783,6 +905,8 @@ private fun AnimatedItemsColumn(
                         onVideoClick = onVideoClick,
                         onDeleteVideo = onDeleteVideo,
                         onDeleteFood = onDeleteFood,
+                        onTrackMapClick = onTrackMapClick,
+                        onDeleteTrack = onDeleteTrack,
                         isCardExpanded = isCardExpanded,
                         onToggleCardExpansion = onToggleCardExpansion
                     )
@@ -804,6 +928,8 @@ private fun AnimatedTimelineItem(
     onVideoClick: (Video) -> Unit = {},
     onDeleteVideo: (String) -> Unit = {},
     onDeleteFood: (String) -> Unit = {},
+    onTrackMapClick: (DailyTrack) -> Unit = {},
+    onDeleteTrack: (String) -> Unit = {},
     isCardExpanded: (String) -> Boolean = { true },
     onToggleCardExpansion: (String) -> Unit = {}
 ) {
@@ -883,6 +1009,25 @@ private fun AnimatedTimelineItem(
                     isExpanded = isCardExpanded(cardId),
                     onToggleExpand = { onToggleCardExpansion(cardId) },
                     cardTitle = stringResource(R.string.food_for_day)
+                )
+            }
+            is TimelineItem.TrackItem -> {
+                val cardId = "track_${item.date}"
+                DayTrackCard(
+                    track = item.track,
+                    onMapClick = { onTrackMapClick(item.track) },
+                    onDelete = { onDeleteTrack(item.track.id) },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    isExpanded = isCardExpanded(cardId),
+                    onToggleExpand = { onToggleCardExpansion(cardId) },
+                    cardTitle = stringResource(R.string.track_for_day),
+                    distanceLabel = stringResource(R.string.track_distance),
+                    durationLabel = stringResource(R.string.track_duration),
+                    speedLabel = stringResource(R.string.track_avg_speed),
+                    stepsLabel = stringResource(R.string.track_steps),
+                    kmUnit = stringResource(R.string.track_km),
+                    kmhUnit = stringResource(R.string.track_kmh),
+                    trackingActiveText = stringResource(R.string.tracking_active)
                 )
             }
         }

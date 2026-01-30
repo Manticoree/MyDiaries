@@ -122,4 +122,53 @@
     <string name="retry">Повторить</string>
     <string name="food_for_day">Еда за день</string>
     <string name="delete_food">Удалить</string>
+
+    <!-- Track / Route -->
+    <string name="start_tracking">Начать маршрут</string>
+    <string name="stop_tracking">Остановить</string>
+    <string name="tracking_notification_title">Запись маршрута</string>
+    <string name="tracking_notification_text">Ваш маршрут записывается</string>
+    <string name="track_for_day">Маршрут за день</string>
+    <string name="track_distance">Расстояние</string>
+    <string name="track_duration">Длительность</string>
+    <string name="track_avg_speed">Ср. скорость</string>
+    <string name="track_km">км</string>
+    <string name="track_kmh">км/ч</string>
+    <string name="delete_track">Удалить маршрут</string>
+    <string name="add_track">Записать маршрут</string>
+    <string name="add_track_description">Отслеживать перемещения за день</string>
+    <string name="full_map">Карта маршрута</string>
+    <string name="no_points">Нет точек маршрута</string>
+    <string name="tracking_active">Запись идёт…</string>
+    <string name="track_steps">Шаги</string>
+
+    <!-- Step Counter -->
+    <string name="steps_today">Шаги сегодня</string>
+    <string name="step_counter_notification_title">Счётчик шагов</string>
+    <string name="step_counter_notification_text">Сегодня: %d шагов</string>
+    <string name="stop_step_counter">Остановить</string>
+    <string name="step_counter_active">активен</string>
+    <string name="step_goal_progress">%1$s из %2$s</string>
+    <string name="activity_recognition_title">Физическая активность</string>
+    <string name="activity_recognition_description">Для подсчёта шагов</string>
+
+    <!-- Bottom Navigation -->
+    <string name="tab_timeline">Лента</string>
+    <string name="tab_history">История</string>
+
+    <!-- History Screen -->
+    <string name="history_title">История</string>
+    <string name="history_your_journey">Ваш путь</string>
+    <string name="history_days">дней</string>
+    <string name="history_entries">записей</string>
+    <string name="history_steps">шагов</string>
+    <string name="history_distance">км</string>
+    <string name="history_expenses">потрачено</string>
+    <string name="history_calories">ккал</string>
+    <string name="history_no_data">Пока нет данных</string>
+    <string name="history_entries_count">%d зап.</string>
+    <string name="history_expenses_count">%s ₽</string>
+    <string name="history_tasks_count">%d зад.</string>
+    <string name="history_steps_count">%d шаг.</string>
+    <string name="history_day_detail_title">Детали дня</string>
 </resources>

@@ -13,6 +13,7 @@ import ru.diaries.mydiaries.data.local.dao.ExpenseDao
 import ru.diaries.mydiaries.data.local.dao.FoodDao
 import ru.diaries.mydiaries.data.local.dao.PhotoDao
 import ru.diaries.mydiaries.data.local.dao.TaskDao
+import ru.diaries.mydiaries.data.local.dao.TrackDao
 import ru.diaries.mydiaries.data.local.dao.VideoDao
 import javax.inject.Singleton
 
@@ -68,5 +69,11 @@ object DatabaseModule {
     @Singleton
     fun provideFoodDao(database: DiaryDatabase): FoodDao {
         return database.foodDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrackDao(database: DiaryDatabase): TrackDao {
+        return database.trackDao()
     }
 }

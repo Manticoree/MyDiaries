@@ -1,5 +1,6 @@
 package ru.diaries.mydiaries.ui.timeline
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,19 +19,25 @@ import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.food.data.repository.FoodRepository
 import ru.diaries.mydiaries.feature.todo.data.model.Task
 import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository
+import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
+import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import ru.diaries.mydiaries.feature.video.data.model.Video
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
+import ru.diaries.mydiaries.service.LocationTrackingService
+import ru.diaries.mydiaries.service.StepCounterService
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class TimelineViewModel @Inject constructor(
+    private val application: Application,
     private val getTimelineItemsUseCase: GetTimelineItemsUseCase,
     private val diaryRepository: DiaryRepository,
     private val expenseRepository: ExpenseRepository,
     private val taskRepository: TaskRepository,
     private val videoRepository: VideoRepository,
-    private val foodRepository: FoodRepository
+    private val foodRepository: FoodRepository,
+    private val trackRepository: TrackRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TimelineState())
@@ -38,6 +45,36 @@ class TimelineViewModel @Inject constructor(
 
     init {
         handleIntent(TimelineIntent.LoadEntries)
+        observeTrackingState()
+        observeStepCounter()
+        startStepCounter()
+    }
+
+    private fun observeTrackingState() {
+        viewModelScope.launch {
+            LocationTrackingService.isTracking.collect { tracking ->
+                _state.update { it.copy(isTracking = tracking) }
+            }
+        }
+    }
+
+    private fun observeStepCounter() {
+        viewModelScope.launch {
+            StepCounterService.todaySteps.collect { steps ->
+                _state.update { it.copy(todaySteps = steps) }
+            }
+        }
+        viewModelScope.launch {
+            StepCounterService.isRunning.collect { running ->
+                _state.update { it.copy(isStepCounterRunning = running) }
+            }
+        }
+    }
+
+    private fun startStepCounter() {
+        if (!StepCounterService.isRunning.value) {
+            StepCounterService.start(application)
+        }
     }
 
     fun handleIntent(intent: TimelineIntent) {
@@ -76,6 +113,11 @@ class TimelineViewModel @Inject constructor(
             is TimelineIntent.DeleteFood -> deleteFood(intent.id)
 
             is TimelineIntent.ToggleCardExpansion -> toggleCardExpansion(intent.cardId)
+
+            is TimelineIntent.ToggleTracking -> toggleTracking()
+            is TimelineIntent.OpenTrackMap -> openTrackMap(intent.track)
+            is TimelineIntent.CloseTrackMap -> closeTrackMap()
+            is TimelineIntent.DeleteTrack -> deleteTrack(intent.id)
         }
     }
 
@@ -86,7 +128,7 @@ class TimelineViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
                 .collect { data ->
-                    val grouped = groupItemsByDate(data.entries, data.expenses, data.tasks, data.videos, data.foodEntries)
+                    val grouped = groupItemsByDate(data.entries, data.expenses, data.tasks, data.videos, data.foodEntries, data.tracks)
                     _state.update {
                         it.copy(
                             entries = data.entries,
@@ -95,6 +137,7 @@ class TimelineViewModel @Inject constructor(
                             todayTasks = data.todayTasks,
                             todayVideos = data.todayVideos,
                             todayFoodEntries = data.todayFoodEntries,
+                            todayTrack = data.todayTrack,
                             isLoading = false
                         )
                     }
@@ -107,9 +150,10 @@ class TimelineViewModel @Inject constructor(
         expenses: List<Expense>,
         tasks: List<Task>,
         videos: List<Video>,
-        foodEntries: List<FoodEntry>
+        foodEntries: List<FoodEntry>,
+        tracks: List<DailyTrack>
     ): List<DateGroup> {
-        val allDates = (entries.map { it.date } + expenses.map { it.date } + tasks.map { it.date } + videos.map { it.date } + foodEntries.map { it.date }).distinct()
+        val allDates = (entries.map { it.date } + expenses.map { it.date } + tasks.map { it.date } + videos.map { it.date } + foodEntries.map { it.date } + tracks.map { it.date }).distinct()
         val today = LocalDate.now()
 
         return allDates.map { date ->
@@ -145,10 +189,17 @@ class TimelineViewModel @Inject constructor(
                 emptyList()
             }
 
+            val dayTrack = tracks.find { it.date == date }
+            val trackItem = if (dayTrack != null) {
+                listOf(TimelineItem.TrackItem(dayTrack))
+            } else {
+                emptyList()
+            }
+
             val existingGroup = _state.value.groupedEntries.find { it.date == date }
             DateGroup(
                 date = date,
-                items = tasksItem + foodItem + videosItem + diaryItems + expensesItem,
+                items = trackItem + tasksItem + foodItem + videosItem + diaryItems + expensesItem,
                 isExpanded = existingGroup?.isExpanded ?: (date == today)
             )
         }.sortedByDescending { it.date }
@@ -310,6 +361,28 @@ class TimelineViewModel @Inject constructor(
             currentState.copy(
                 cardExpandedStates = currentState.cardExpandedStates + (cardId to !currentExpanded)
             )
+        }
+    }
+
+    private fun toggleTracking() {
+        if (_state.value.isTracking) {
+            LocationTrackingService.stop(application)
+        } else {
+            LocationTrackingService.start(application)
+        }
+    }
+
+    private fun openTrackMap(track: DailyTrack) {
+        _state.update { it.copy(showFullMapDialog = true, fullMapTrack = track) }
+    }
+
+    private fun closeTrackMap() {
+        _state.update { it.copy(showFullMapDialog = false, fullMapTrack = null) }
+    }
+
+    private fun deleteTrack(id: String) {
+        viewModelScope.launch {
+            trackRepository.deleteTrack(id)
         }
     }
 }

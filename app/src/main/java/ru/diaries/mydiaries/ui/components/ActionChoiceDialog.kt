@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material3.Icon
@@ -59,6 +60,8 @@ fun ActionChoiceDialog(
     onAddTask: () -> Unit,
     onAddVideo: () -> Unit,
     onAddFood: () -> Unit,
+    onToggleTracking: () -> Unit,
+    isTracking: Boolean,
     onDismiss: () -> Unit
 ) {
     val animationProgress = remember { Animatable(0f) }
@@ -190,6 +193,19 @@ fun ActionChoiceDialog(
                     onClick = {
                         onDismiss()
                         onAddFood()
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ActionItemCard(
+                    icon = Icons.Outlined.Route,
+                    title = if (isTracking) stringResource(R.string.stop_tracking) else stringResource(R.string.add_track),
+                    subtitle = if (isTracking) stringResource(R.string.tracking_active) else stringResource(R.string.add_track_description),
+                    gradientColors = listOf(LavenderMist, SageGreen),
+                    onClick = {
+                        onDismiss()
+                        onToggleTracking()
                     }
                 )
             }

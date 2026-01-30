@@ -4,7 +4,22 @@
       "Bash(curl:*)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(where:*)",
+      "Bash(echo:*)",
+      "Bash(\"C:/Users/New/AppData/Local/Android/Sdk/platform-tools/adb.exe\" devices)",
+      "Bash(\"C:/Users/New/AppData/Local/Android/Sdk/platform-tools/adb.exe\" logcat -d -s TFLiteFoodClassifier:D CalorieDatabase:D)",
+      "Bash(\"C:/Users/New/AppData/Local/Android/Sdk/platform-tools/adb.exe\" logcat -d)",
+      "Bash(\"C:/Users/New/AppData/Local/Android/Sdk/platform-tools/adb.exe\" install -r F:/androidprojects/myDiaries/app/build/outputs/apk/debug/app-debug.apk)",
+      "Bash(wc:*)",
+      "Bash(dir \"F:\\\\androidprojects\\\\myDiaries\")",
+      "Bash(dir:*)",
+      "Bash(.\\\\gradlew assembleDebug:*)",
+      "Bash(.\\\\gradlew.bat assembleDebug:*)",
+      "Bash(cmd /c \"gradlew.bat assembleDebug\")",
+      "Bash(cmd /c \"gradlew assembleDebug 2>&1\")",
+      "Bash(\"F:\\\\androidprojects\\\\myDiaries\\\\gradlew.bat\" assembleDebug)"
     ]
   }
 }

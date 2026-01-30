@@ -7,17 +7,20 @@ import ru.diaries.mydiaries.data.local.dao.ExpenseDao
 import ru.diaries.mydiaries.data.local.dao.FoodDao
 import ru.diaries.mydiaries.data.local.dao.PhotoDao
 import ru.diaries.mydiaries.data.local.dao.TaskDao
+import ru.diaries.mydiaries.data.local.dao.TrackDao
 import ru.diaries.mydiaries.data.local.dao.VideoDao
+import ru.diaries.mydiaries.data.local.entity.DailyTrackEntity
 import ru.diaries.mydiaries.data.local.entity.DiaryEntryEntity
 import ru.diaries.mydiaries.data.local.entity.ExpenseEntity
 import ru.diaries.mydiaries.data.local.entity.FoodEntity
+import ru.diaries.mydiaries.data.local.entity.LocationPointEntity
 import ru.diaries.mydiaries.data.local.entity.PhotoEntity
 import ru.diaries.mydiaries.data.local.entity.TaskEntity
 import ru.diaries.mydiaries.data.local.entity.VideoEntity
 
 @Database(
-    entities = [DiaryEntryEntity::class, PhotoEntity::class, ExpenseEntity::class, TaskEntity::class, VideoEntity::class, FoodEntity::class],
-    version = 6,
+    entities = [DiaryEntryEntity::class, PhotoEntity::class, ExpenseEntity::class, TaskEntity::class, VideoEntity::class, FoodEntity::class, DailyTrackEntity::class, LocationPointEntity::class],
+    version = 7,
     exportSchema = false
 )
 abstract class DiaryDatabase : RoomDatabase() {
@@ -27,4 +30,5 @@ abstract class DiaryDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun videoDao(): VideoDao
     abstract fun foodDao(): FoodDao
+    abstract fun trackDao(): TrackDao
 }

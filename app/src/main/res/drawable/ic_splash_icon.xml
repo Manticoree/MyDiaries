@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="108dp"
+            android:height="108dp"
+            android:viewportWidth="108"
+            android:viewportHeight="108">
+
+            <!-- Background circle -->
+            <group android:name="circle_group"
+                android:pivotX="54"
+                android:pivotY="54">
+                <path
+                    android:name="circle"
+                    android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"
+                    android:fillColor="#8B7355"/>
+            </group>
+
+            <!-- Book/Diary icon -->
+            <group android:name="book_group"
+                android:pivotX="54"
+                android:pivotY="54">
+                <!-- Book cover -->
+                <path
+                    android:name="book_cover"
+                    android:pathData="M34,32 L34,76 C34,78 36,80 38,80 L70,80 C72,80 74,78 74,76 L74,32 C74,30 72,28 70,28 L38,28 C36,28 34,30 34,32 Z"
+                    android:fillColor="#FFF8F0"/>
+
+                <!-- Book spine -->
+                <path
+                    android:name="spine"
+                    android:pathData="M34,32 L34,76 C34,78 36,80 38,80 L42,80 L42,28 L38,28 C36,28 34,30 34,32 Z"
+                    android:fillColor="#CD7F5C"/>
+
+                <!-- Lines on pages -->
+                <path
+                    android:name="line1"
+                    android:pathData="M48,40 L68,40"
+                    android:strokeWidth="2"
+                    android:strokeColor="#D4C4B0"/>
+                <path
+                    android:name="line2"
+                    android:pathData="M48,48 L68,48"
+                    android:strokeWidth="2"
+                    android:strokeColor="#D4C4B0"/>
+                <path
+                    android:name="line3"
+                    android:pathData="M48,56 L62,56"
+                    android:strokeWidth="2"
+                    android:strokeColor="#D4C4B0"/>
+
+                <!-- Bookmark -->
+                <path
+                    android:name="bookmark"
+                    android:pathData="M62,28 L62,38 L66,34 L70,38 L70,28 Z"
+                    android:fillColor="#6B8E6B"/>
+            </group>
+        </vector>
+    </aapt:attr>
+
+    <!-- Scale animation for circle -->
+    <target android:name="circle_group">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="600"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:interpolator="@android:interpolator/overshoot"/>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="600"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:interpolator="@android:interpolator/overshoot"/>
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Scale and fade animation for book -->
+    <target android:name="book_group">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="500"
+                    android:startOffset="200"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:interpolator="@android:interpolator/decelerate_cubic"/>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="500"
+                    android:startOffset="200"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:interpolator="@android:interpolator/decelerate_cubic"/>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

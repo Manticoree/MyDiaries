@@ -2,6 +2,7 @@ package ru.diaries.mydiaries.feature.food.ml
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.Interpreter
@@ -22,11 +23,9 @@ class TFLiteFoodClassifier(private val context: Context) : FoodClassifierContrac
     companion object {
         private const val MODEL_PATH = "food101_model.tflite"
         private const val LABELS_PATH = "food_labels.txt"
-        private const val IMAGE_SIZE = 224
+        private const val IMAGE_SIZE = 192  // Model expects 192x192
         private const val PIXEL_SIZE = 3
         private const val MAX_RESULTS = 5
-        private const val IMAGE_MEAN = 0f
-        private const val IMAGE_STD = 255f
     }
 
     override fun initialize(): Boolean {
@@ -83,30 +82,27 @@ class TFLiteFoodClassifier(private val context: Context) : FoodClassifierContrac
         // Resize bitmap to required input size
         val scaledBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
 
-        // Allocate buffer for input tensor
-        val inputBuffer = ByteBuffer.allocateDirect(4 * IMAGE_SIZE * IMAGE_SIZE * PIXEL_SIZE)
+        // Allocate buffer for input tensor (uint8 format - 1 byte per channel)
+        val inputBuffer = ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * PIXEL_SIZE)
         inputBuffer.order(ByteOrder.nativeOrder())
         inputBuffer.rewind()
 
-        // Extract pixel values and normalize
+        // Extract pixel values as uint8 (0-255)
         val pixels = IntArray(IMAGE_SIZE * IMAGE_SIZE)
         scaledBitmap.getPixels(pixels, 0, IMAGE_SIZE, 0, 0, IMAGE_SIZE, IMAGE_SIZE)
 
         for (pixel in pixels) {
-            // Extract RGB values and normalize to [0, 1]
-            val r = ((pixel shr 16) and 0xFF).toFloat()
-            val g = ((pixel shr 8) and 0xFF).toFloat()
-            val b = (pixel and 0xFF).toFloat()
-
-            inputBuffer.putFloat((r - IMAGE_MEAN) / IMAGE_STD)
-            inputBuffer.putFloat((g - IMAGE_MEAN) / IMAGE_STD)
-            inputBuffer.putFloat((b - IMAGE_MEAN) / IMAGE_STD)
+            // Extract RGB values as bytes (uint8)
+            inputBuffer.put(((pixel shr 16) and 0xFF).toByte())  // R
+            inputBuffer.put(((pixel shr 8) and 0xFF).toByte())   // G
+            inputBuffer.put((pixel and 0xFF).toByte())           // B
         }
 
         if (scaledBitmap != bitmap) {
             scaledBitmap.recycle()
         }
 
+        inputBuffer.rewind()
         return inputBuffer
     }
 
@@ -123,9 +119,11 @@ class TFLiteFoodClassifier(private val context: Context) : FoodClassifierContrac
             .filter { it.second > 0.01f } // Filter out very low confidence
             .map { (index, probability) ->
                 val label = labels.getOrElse(index) { "unknown" }
+                val displayName = CalorieDatabase.getDisplayName(label)
+                Log.d("TFLiteFoodClassifier", "Label: '$label' -> DisplayName: '$displayName'")
                 FoodPrediction(
                     label = label,
-                    displayName = CalorieDatabase.getDisplayName(label),
+                    displayName = displayName,
                     confidence = probability,
                     caloriesPer100g = CalorieDatabase.getCaloriesPer100g(label)
                 )

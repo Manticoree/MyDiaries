@@ -4,6 +4,7 @@ import ru.diaries.mydiaries.data.model.DiaryEntry
 import ru.diaries.mydiaries.data.model.Expense
 import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.todo.data.model.Task
+import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
 import ru.diaries.mydiaries.feature.video.data.model.Video
 
 data class TimelineState(
@@ -36,7 +37,17 @@ data class TimelineState(
     val videoDialogKey: String = "",
     val playingVideo: Video? = null,
     val showAddFoodDialog: Boolean = false,
-    val foodDialogKey: String = ""
+    val foodDialogKey: String = "",
+
+    // Track state
+    val todayTrack: DailyTrack? = null,
+    val isTracking: Boolean = false,
+    val showFullMapDialog: Boolean = false,
+    val fullMapTrack: DailyTrack? = null,
+
+    // Step counter
+    val todaySteps: Int = 0,
+    val isStepCounterRunning: Boolean = false
 ) {
     fun isCardExpanded(cardId: String): Boolean = cardExpandedStates[cardId] ?: true
 }

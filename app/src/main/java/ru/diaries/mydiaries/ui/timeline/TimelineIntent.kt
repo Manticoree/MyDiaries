@@ -47,4 +47,10 @@ sealed class TimelineIntent {
 
     // Card expansion
     data class ToggleCardExpansion(val cardId: String) : TimelineIntent()
+
+    // Track actions
+    data object ToggleTracking : TimelineIntent()
+    data class OpenTrackMap(val track: ru.diaries.mydiaries.feature.track.data.model.DailyTrack) : TimelineIntent()
+    data object CloseTrackMap : TimelineIntent()
+    data class DeleteTrack(val id: String) : TimelineIntent()
 }

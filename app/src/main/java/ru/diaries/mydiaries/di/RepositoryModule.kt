@@ -10,9 +10,11 @@ import ru.diaries.mydiaries.data.repository.RoomDiaryRepository
 import ru.diaries.mydiaries.data.repository.RoomExpenseRepository
 import ru.diaries.mydiaries.data.repository.RoomFoodRepository
 import ru.diaries.mydiaries.data.repository.RoomTaskRepository
+import ru.diaries.mydiaries.data.repository.RoomTrackRepository
 import ru.diaries.mydiaries.data.repository.RoomVideoRepository
 import ru.diaries.mydiaries.feature.food.data.repository.FoodRepository
 import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository
+import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
 import javax.inject.Singleton
 
@@ -49,4 +51,10 @@ abstract class RepositoryModule {
     abstract fun bindFoodRepository(
         roomFoodRepository: RoomFoodRepository
     ): FoodRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTrackRepository(
+        roomTrackRepository: RoomTrackRepository
+    ): TrackRepository
 }
