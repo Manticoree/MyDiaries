@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.ui.video
+package ru.diaries.mydiaries.feature.video.ui
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.diaries.mydiaries.domain.usecase.video.SaveVideoUseCase
+import ru.diaries.mydiaries.feature.video.domain.usecase.SaveVideoUseCase
 import ru.diaries.mydiaries.feature.video.data.model.Video
 import java.util.UUID
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.domain.usecase.food
+package ru.diaries.mydiaries.feature.food.domain.usecase
 
 import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.food.data.repository.FoodRepository

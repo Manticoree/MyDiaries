@@ -94,7 +94,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun EditorScreen(
     entryId: String?,
-    viewModel: EditorViewModel = hiltViewModel(),
+    viewModelKey: String = entryId ?: "",
+    viewModel: EditorViewModel = hiltViewModel(key = viewModelKey),
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()

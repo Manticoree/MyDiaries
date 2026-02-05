@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.ui.task
+package ru.diaries.mydiaries.feature.todo.ui
 
 data class AddTaskDialogState(
     val taskTitles: List<String> = listOf(""),

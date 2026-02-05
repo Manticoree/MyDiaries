@@ -20,6 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -30,6 +34,7 @@ import ru.diaries.mydiaries.ui.components.DiaryEntryCard
 import ru.diaries.mydiaries.feature.food.ui.DayFoodCard
 import ru.diaries.mydiaries.feature.todo.ui.DayTasksCard
 import ru.diaries.mydiaries.feature.track.ui.DayTrackCard
+import ru.diaries.mydiaries.feature.track.ui.FullScreenMapDialog
 import ru.diaries.mydiaries.feature.video.ui.DayVideosCard
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -42,6 +47,24 @@ fun DayDetailScreen(
     onBack: () -> Unit
 ) {
     val dateText = formatDayDetailDate(daySummary.date)
+    var showMapDialog by remember { mutableStateOf(false) }
+
+    if (showMapDialog && daySummary.track != null) {
+        FullScreenMapDialog(
+            track = daySummary.track!!,
+            isTracking = false,
+            onToggleTracking = {},
+            onDismiss = { showMapDialog = false },
+            titleText = stringResource(R.string.full_map),
+            distanceLabel = stringResource(R.string.track_distance),
+            durationLabel = stringResource(R.string.track_duration),
+            speedLabel = stringResource(R.string.track_avg_speed),
+            stepsLabel = stringResource(R.string.track_steps),
+            kmUnit = stringResource(R.string.track_km),
+            kmhUnit = stringResource(R.string.track_kmh),
+            showTrackingButton = false
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -78,7 +101,7 @@ fun DayDetailScreen(
             daySummary.track?.let { track ->
                 DayTrackCard(
                     track = track,
-                    onMapClick = {},
+                    onMapClick = { showMapDialog = true },
                     onDelete = {},
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     isExpanded = true,
@@ -90,7 +113,8 @@ fun DayDetailScreen(
                     stepsLabel = stringResource(R.string.track_steps),
                     kmUnit = stringResource(R.string.track_km),
                     kmhUnit = stringResource(R.string.track_kmh),
-                    trackingActiveText = stringResource(R.string.tracking_active)
+                    trackingActiveText = stringResource(R.string.tracking_active),
+                    mapButtonText = stringResource(R.string.open_map)
                 )
             }
 

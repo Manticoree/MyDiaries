@@ -1,5 +1,6 @@
 package ru.diaries.mydiaries
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,9 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -26,12 +31,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
+import ru.diaries.mydiaries.service.StepCounterService
 import ru.diaries.mydiaries.ui.history.HistoryScreen
 import ru.diaries.mydiaries.ui.permissions.PermissionsScreen
 import ru.diaries.mydiaries.ui.permissions.checkAllPermissionsGranted
 import ru.diaries.mydiaries.ui.splash.SplashScreen
+import ru.diaries.mydiaries.ui.statistics.StatisticsScreen
+import ru.diaries.mydiaries.ui.statistics.charts.HourlyStepsChartScreen
 import ru.diaries.mydiaries.ui.theme.MyDiariesTheme
 import ru.diaries.mydiaries.ui.timeline.TimelineScreen
 
@@ -39,6 +49,7 @@ import ru.diaries.mydiaries.ui.timeline.TimelineScreen
 class MainActivity : ComponentActivity() {
 
     private var keepSplashOnScreen = true
+    private val showHourlyStepsChart = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen before super.onCreate
@@ -47,6 +58,7 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        checkStepChartIntent(intent)
 
         setContent {
             MyDiariesTheme {
@@ -89,7 +101,17 @@ class MainActivity : ComponentActivity() {
 
                         Scaffold(
                             bottomBar = {
-                                NavigationBar {
+                                NavigationBar(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    tonalElevation = NavigationBarDefaults.Elevation
+                                ) {
+                                    val navItemColors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     NavigationBarItem(
                                         selected = selectedTab == 0,
                                         onClick = { selectedTab = 0 },
@@ -100,8 +122,12 @@ class MainActivity : ComponentActivity() {
                                             )
                                         },
                                         label = {
-                                            Text(text = stringResource(R.string.tab_timeline))
-                                        }
+                                            Text(
+                                                text = stringResource(R.string.tab_timeline),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        colors = navItemColors
                                     )
                                     NavigationBarItem(
                                         selected = selectedTab == 1,
@@ -113,8 +139,29 @@ class MainActivity : ComponentActivity() {
                                             )
                                         },
                                         label = {
-                                            Text(text = stringResource(R.string.tab_history))
-                                        }
+                                            Text(
+                                                text = stringResource(R.string.tab_history),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        colors = navItemColors
+                                    )
+                                    NavigationBarItem(
+                                        selected = selectedTab == 2,
+                                        onClick = { selectedTab = 2 },
+                                        icon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.BarChart,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                text = stringResource(R.string.tab_statistics),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        colors = navItemColors
                                     )
                                 }
                             }
@@ -125,14 +172,43 @@ class MainActivity : ComponentActivity() {
                                     .padding(innerPadding)
                             ) {
                                 when (selectedTab) {
-                                    0 -> TimelineScreen(showFab = true)
+                                    0 -> TimelineScreen(
+                                        showFab = true,
+                                        onStepCardClick = { showHourlyStepsChart.value = true }
+                                    )
                                     1 -> HistoryScreen()
+                                    2 -> StatisticsScreen()
                                 }
+                            }
+                        }
+
+                        if (showHourlyStepsChart.value) {
+                            Dialog(
+                                onDismissRequest = { showHourlyStepsChart.value = false },
+                                properties = DialogProperties(
+                                    usePlatformDefaultWidth = false,
+                                    decorFitsSystemWindows = false
+                                )
+                            ) {
+                                HourlyStepsChartScreen(
+                                    onBack = { showHourlyStepsChart.value = false }
+                                )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        checkStepChartIntent(intent)
+    }
+
+    private fun checkStepChartIntent(intent: Intent?) {
+        if (intent?.action == StepCounterService.ACTION_SHOW_STEPS_CHART) {
+            showHourlyStepsChart.value = true
         }
     }
 }

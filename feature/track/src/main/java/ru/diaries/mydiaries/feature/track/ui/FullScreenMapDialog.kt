@@ -46,7 +46,8 @@ fun FullScreenMapDialog(
     speedLabel: String = "Ср. скорость",
     stepsLabel: String = "Шаги",
     kmUnit: String = "км",
-    kmhUnit: String = "км/ч"
+    kmhUnit: String = "км/ч",
+    showTrackingButton: Boolean = true
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -124,25 +125,27 @@ fun FullScreenMapDialog(
                                 kmhUnit = kmhUnit
                             )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            if (showTrackingButton) {
+                                Spacer(modifier = Modifier.height(12.dp))
 
-                            Button(
-                                onClick = onToggleTracking,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = if (isTracking) {
-                                    ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.error
+                                Button(
+                                    onClick = onToggleTracking,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = if (isTracking) {
+                                        ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.error
+                                        )
+                                    } else {
+                                        ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(
+                                        text = if (isTracking) stopTrackingText else startTrackingText
                                     )
-                                } else {
-                                    ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text(
-                                    text = if (isTracking) stopTrackingText else startTrackingText
-                                )
+                                }
                             }
                         }
                     }

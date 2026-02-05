@@ -715,6 +715,37 @@ object CalorieDatabase {
         "cola" to "Кола",
         "beer" to "Пиво",
         "wine" to "Вино",
-        "cocktail" to "Коктейль"
+        "cocktail" to "Коктейль",
+
+        // Generic ML Kit labels (fallback translations)
+        "food" to "Еда",
+        "dish" to "Блюдо",
+        "cuisine" to "Блюдо",
+        "meal" to "Еда",
+        "snack" to "Перекус",
+        "dessert" to "Десерт",
+        "breakfast" to "Завтрак",
+        "lunch" to "Обед",
+        "dinner" to "Ужин",
+        "fruit" to "Фрукт",
+        "vegetable" to "Овощ",
+        "meat" to "Мясо",
+        "seafood" to "Морепродукты",
+        "produce" to "Продукты",
+        "ingredient" to "Ингредиент",
+        "recipe" to "Блюдо",
+        "cooking" to "Готовка",
+        "baking" to "Выпечка",
+        "fried" to "Жареное",
+        "grilled" to "Гриль",
+        "baked" to "Выпечка",
+        "roasted" to "Жаркое",
+        "fast food" to "Фастфуд",
+        "junk food" to "Фастфуд",
+        "noodle" to "Лапша",
+        "dumpling" to "Пельмени",
+        "egg" to "Яйцо",
+        "chicken" to "Курица",
+        "pancake" to "Блинчик"
     )
 }

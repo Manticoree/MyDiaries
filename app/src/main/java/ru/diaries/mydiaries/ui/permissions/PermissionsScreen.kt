@@ -61,14 +61,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import ru.diaries.mydiaries.R
 
 data class PermissionItem(
     val permission: String,
     val icon: ImageVector,
-    val title: String,
-    val description: String,
+    val titleResId: Int,
+    val descriptionResId: Int,
     val isGranted: Boolean
 )
 
@@ -150,7 +152,7 @@ fun PermissionsScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "Разрешения",
+                        text = stringResource(R.string.permissions_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -159,7 +161,7 @@ fun PermissionsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Для полноценной работы приложению нужны следующие разрешения",
+                        text = stringResource(R.string.permissions_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -227,7 +229,7 @@ fun PermissionsScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Все разрешения получены!",
+                                    text = stringResource(R.string.permissions_all_granted),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = Color(0xFF4CAF50),
                                     fontWeight = FontWeight.SemiBold
@@ -253,7 +255,7 @@ fun PermissionsScreen(
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Text(
-                                text = "Предоставить разрешения",
+                                text = stringResource(R.string.permissions_grant_button),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -281,13 +283,13 @@ fun PermissionsScreen(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = "Открыть настройки")
+                                Text(text = stringResource(R.string.permissions_open_settings))
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "Если разрешения были отклонены, предоставьте их в настройках",
+                                text = stringResource(R.string.permissions_settings_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
@@ -301,13 +303,13 @@ fun PermissionsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text(text = "Пропустить")
+                            Text(text = stringResource(R.string.permissions_skip))
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Вы сможете предоставить разрешения позже",
+                            text = stringResource(R.string.permissions_skip_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -366,14 +368,14 @@ private fun PermissionItemCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.title,
+                    text = stringResource(item.titleResId),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = item.description,
+                    text = stringResource(item.descriptionResId),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -385,7 +387,7 @@ private fun PermissionItemCard(
                     color = Color(0xFF4CAF50).copy(alpha = 0.2f)
                 ) {
                     Text(
-                        text = "OK",
+                        text = stringResource(R.string.permission_status_ok),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF4CAF50),
@@ -405,8 +407,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
         PermissionItem(
             permission = Manifest.permission.CAMERA,
             icon = Icons.Outlined.CameraAlt,
-            title = "Камера",
-            description = "Для фотографирования еды и записи видео",
+            titleResId = R.string.permission_camera_title,
+            descriptionResId = R.string.permission_camera_desc,
             isGranted = context.checkSelfPermission(Manifest.permission.CAMERA) ==
                     android.content.pm.PackageManager.PERMISSION_GRANTED
         )
@@ -417,8 +419,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
         PermissionItem(
             permission = Manifest.permission.ACCESS_FINE_LOCATION,
             icon = Icons.Outlined.LocationOn,
-            title = "Геолокация",
-            description = "Для записи маршрутов на карте",
+            titleResId = R.string.permission_location_title,
+            descriptionResId = R.string.permission_location_desc,
             isGranted = context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
                     android.content.pm.PackageManager.PERMISSION_GRANTED
         )
@@ -429,8 +431,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
         PermissionItem(
             permission = Manifest.permission.RECORD_AUDIO,
             icon = Icons.Outlined.Mic,
-            title = "Микрофон",
-            description = "Для записи звука в видео",
+            titleResId = R.string.permission_mic_title,
+            descriptionResId = R.string.permission_mic_desc,
             isGranted = context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
                     android.content.pm.PackageManager.PERMISSION_GRANTED
         )
@@ -442,8 +444,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
             PermissionItem(
                 permission = Manifest.permission.ACTIVITY_RECOGNITION,
                 icon = Icons.AutoMirrored.Outlined.DirectionsWalk,
-                title = "Физическая активность",
-                description = "Для подсчёта шагов",
+                titleResId = R.string.permission_activity_title,
+                descriptionResId = R.string.permission_activity_desc,
                 isGranted = context.checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) ==
                         android.content.pm.PackageManager.PERMISSION_GRANTED
             )
@@ -456,8 +458,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
             PermissionItem(
                 permission = Manifest.permission.READ_MEDIA_IMAGES,
                 icon = Icons.Outlined.PhotoLibrary,
-                title = "Фото",
-                description = "Для выбора фотографий из галереи",
+                titleResId = R.string.permission_photos_title,
+                descriptionResId = R.string.permission_photos_desc,
                 isGranted = context.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) ==
                         android.content.pm.PackageManager.PERMISSION_GRANTED
             )
@@ -467,8 +469,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
             PermissionItem(
                 permission = Manifest.permission.READ_MEDIA_VIDEO,
                 icon = Icons.Outlined.PhotoLibrary,
-                title = "Видео",
-                description = "Для выбора видео из галереи",
+                titleResId = R.string.permission_videos_title,
+                descriptionResId = R.string.permission_videos_desc,
                 isGranted = context.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) ==
                         android.content.pm.PackageManager.PERMISSION_GRANTED
             )
@@ -478,8 +480,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
             PermissionItem(
                 permission = Manifest.permission.POST_NOTIFICATIONS,
                 icon = Icons.Outlined.Notifications,
-                title = "Уведомления",
-                description = "Для напоминаний о записях",
+                titleResId = R.string.permission_notifications_title,
+                descriptionResId = R.string.permission_notifications_desc,
                 isGranted = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
                         android.content.pm.PackageManager.PERMISSION_GRANTED
             )
@@ -491,8 +493,8 @@ private fun getRequiredPermissions(context: android.content.Context): List<Permi
             PermissionItem(
                 permission = Manifest.permission.READ_EXTERNAL_STORAGE,
                 icon = Icons.Outlined.PhotoLibrary,
-                title = "Медиафайлы",
-                description = "Для доступа к фото и видео из галереи",
+                titleResId = R.string.permission_media_title,
+                descriptionResId = R.string.permission_media_desc,
                 isGranted = context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
                         android.content.pm.PackageManager.PERMISSION_GRANTED
             )

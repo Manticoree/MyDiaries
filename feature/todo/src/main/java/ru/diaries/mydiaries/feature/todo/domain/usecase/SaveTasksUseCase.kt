@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.domain.usecase.task
+package ru.diaries.mydiaries.feature.todo.domain.usecase
 
 import ru.diaries.mydiaries.feature.todo.data.model.Task
 import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository

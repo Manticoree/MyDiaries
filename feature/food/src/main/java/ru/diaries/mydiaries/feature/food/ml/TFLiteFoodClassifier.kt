@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
 import java.nio.ByteBuffer
@@ -19,8 +20,10 @@ class TFLiteFoodClassifier(private val context: Context) : FoodClassifierContrac
     private var interpreter: Interpreter? = null
     private var labels: List<String> = emptyList()
     private var isInitialized = false
+    private var isFloatModel = true
 
     companion object {
+        private const val TAG = "TFLiteFoodClassifier"
         private const val MODEL_PATH = "food101_model.tflite"
         private const val LABELS_PATH = "food_labels.txt"
         private const val IMAGE_SIZE = 192  // Model expects 192x192
@@ -37,13 +40,19 @@ class TFLiteFoodClassifier(private val context: Context) : FoodClassifierContrac
             }
             interpreter = Interpreter(modelBuffer, options)
 
+            // Detect model input format
+            val inputTensor = interpreter!!.getInputTensor(0)
+            isFloatModel = inputTensor.dataType() == DataType.FLOAT32
+            Log.d(TAG, "Model input: dtype=${inputTensor.dataType()}, shape=${inputTensor.shape().contentToString()}")
+            Log.d(TAG, "Model output: dtype=${interpreter!!.getOutputTensor(0).dataType()}, shape=${interpreter!!.getOutputTensor(0).shape().contentToString()}")
+
             // Load labels
             labels = FileUtil.loadLabels(context, LABELS_PATH)
 
             isInitialized = true
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Initialization failed", e)
             isInitialized = false
             false
         }
@@ -79,23 +88,31 @@ class TFLiteFoodClassifier(private val context: Context) : FoodClassifierContrac
     }
 
     private fun preprocessImage(bitmap: Bitmap): ByteBuffer {
-        // Resize bitmap to required input size
         val scaledBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, true)
 
-        // Allocate buffer for input tensor (uint8 format - 1 byte per channel)
-        val inputBuffer = ByteBuffer.allocateDirect(IMAGE_SIZE * IMAGE_SIZE * PIXEL_SIZE)
+        val bytesPerChannel = if (isFloatModel) 4 else 1
+        val bufferSize = IMAGE_SIZE * IMAGE_SIZE * PIXEL_SIZE * bytesPerChannel
+        val inputBuffer = ByteBuffer.allocateDirect(bufferSize)
         inputBuffer.order(ByteOrder.nativeOrder())
         inputBuffer.rewind()
 
-        // Extract pixel values as uint8 (0-255)
         val pixels = IntArray(IMAGE_SIZE * IMAGE_SIZE)
         scaledBitmap.getPixels(pixels, 0, IMAGE_SIZE, 0, 0, IMAGE_SIZE, IMAGE_SIZE)
 
         for (pixel in pixels) {
-            // Extract RGB values as bytes (uint8)
-            inputBuffer.put(((pixel shr 16) and 0xFF).toByte())  // R
-            inputBuffer.put(((pixel shr 8) and 0xFF).toByte())   // G
-            inputBuffer.put((pixel and 0xFF).toByte())           // B
+            val r = (pixel shr 16) and 0xFF
+            val g = (pixel shr 8) and 0xFF
+            val b = pixel and 0xFF
+
+            if (isFloatModel) {
+                inputBuffer.putFloat(r / 255.0f)
+                inputBuffer.putFloat(g / 255.0f)
+                inputBuffer.putFloat(b / 255.0f)
+            } else {
+                inputBuffer.put(r.toByte())
+                inputBuffer.put(g.toByte())
+                inputBuffer.put(b.toByte())
+            }
         }
 
         if (scaledBitmap != bitmap) {

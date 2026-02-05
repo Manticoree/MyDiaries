@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.ui.food
+package ru.diaries.mydiaries.feature.food.ui
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.diaries.mydiaries.domain.usecase.food.SaveFoodUseCase
+import ru.diaries.mydiaries.feature.food.domain.usecase.SaveFoodUseCase
 import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.food.data.model.ServingSize
 import ru.diaries.mydiaries.feature.food.ml.CompositeFoodClassifier

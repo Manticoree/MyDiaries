@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.ui.task
+package ru.diaries.mydiaries.feature.todo.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.diaries.mydiaries.domain.usecase.task.SaveTasksUseCase
+import ru.diaries.mydiaries.feature.todo.domain.usecase.SaveTasksUseCase
 import javax.inject.Inject
 
 @HiltViewModel

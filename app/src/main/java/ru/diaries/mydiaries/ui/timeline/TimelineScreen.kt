@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.WindowInsets
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -38,8 +41,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -76,10 +79,10 @@ import ru.diaries.mydiaries.ui.expense.AddExpenseDialogEffect
 import ru.diaries.mydiaries.ui.expense.AddExpenseDialogIntent
 import ru.diaries.mydiaries.ui.expense.AddExpenseDialogViewModel
 import ru.diaries.mydiaries.ui.expense.ExpenseStatsDialog
-import ru.diaries.mydiaries.ui.task.AddTaskDialogEffect
-import ru.diaries.mydiaries.ui.task.AddTaskDialogIntent
-import ru.diaries.mydiaries.ui.task.AddTaskDialogViewModel
 import ru.diaries.mydiaries.feature.todo.ui.AddTaskDialog
+import ru.diaries.mydiaries.feature.todo.ui.AddTaskDialogEffect
+import ru.diaries.mydiaries.feature.todo.ui.AddTaskDialogIntent
+import ru.diaries.mydiaries.feature.todo.ui.AddTaskDialogViewModel
 import ru.diaries.mydiaries.feature.todo.ui.DayTasksCard
 import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.food.ui.AddFoodDialog
@@ -91,12 +94,12 @@ import ru.diaries.mydiaries.feature.video.data.model.Video
 import ru.diaries.mydiaries.feature.video.ui.AddVideoDialog
 import ru.diaries.mydiaries.feature.video.ui.DayVideosCard
 import ru.diaries.mydiaries.feature.video.ui.VideoPlayerDialog
-import ru.diaries.mydiaries.ui.food.AddFoodDialogEffect
-import ru.diaries.mydiaries.ui.food.AddFoodDialogIntent
-import ru.diaries.mydiaries.ui.food.AddFoodDialogViewModel
-import ru.diaries.mydiaries.ui.video.AddVideoDialogEffect
-import ru.diaries.mydiaries.ui.video.AddVideoDialogIntent
-import ru.diaries.mydiaries.ui.video.AddVideoDialogViewModel
+import ru.diaries.mydiaries.feature.food.ui.AddFoodDialogEffect
+import ru.diaries.mydiaries.feature.food.ui.AddFoodDialogIntent
+import ru.diaries.mydiaries.feature.food.ui.AddFoodDialogViewModel
+import ru.diaries.mydiaries.feature.video.ui.AddVideoDialogEffect
+import ru.diaries.mydiaries.feature.video.ui.AddVideoDialogIntent
+import ru.diaries.mydiaries.feature.video.ui.AddVideoDialogViewModel
 import ru.diaries.mydiaries.ui.theme.GoldenHoney
 import ru.diaries.mydiaries.ui.theme.NumberStyle
 import ru.diaries.mydiaries.ui.theme.SageGreen
@@ -110,22 +113,35 @@ import java.util.Locale
 @Composable
 fun TimelineScreen(
     viewModel: TimelineViewModel = hiltViewModel(),
-    showFab: Boolean = true
+    showFab: Boolean = true,
+    onStepCardClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    val greeting = getGreetingText()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            MediumTopAppBar(
+            TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(R.string.home_title)
-                    )
+                    Column {
+                        Text(
+                            text = greeting,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = formatTodayDate(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
@@ -158,6 +174,15 @@ fun TimelineScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                )
                 .padding(paddingValues)
         ) {
             when {
@@ -176,7 +201,8 @@ fun TimelineScreen(
                                 expenses = state.todayExpenses,
                                 steps = state.todaySteps,
                                 isStepCounterRunning = state.isStepCounterRunning,
-                                onExpenseClick = { viewModel.handleIntent(TimelineIntent.ShowExpenseStatsDialog) }
+                                onExpenseClick = { viewModel.handleIntent(TimelineIntent.ShowExpenseStatsDialog) },
+                                onStepCardClick = onStepCardClick
                             )
                         }
 
@@ -243,7 +269,7 @@ fun TimelineScreen(
                                 }
 
                                 item(key = "spacer_${dateGroup.date}") {
-                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
                         }
@@ -255,19 +281,18 @@ fun TimelineScreen(
 
     // Editor Dialog
     if (state.showEditorDialog) {
-        key(state.editorDialogKey) {
-            Dialog(
-                onDismissRequest = { viewModel.handleIntent(TimelineIntent.CloseEditorDialog) },
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    decorFitsSystemWindows = false
-                )
-            ) {
-                EditorScreen(
-                    entryId = state.editingEntryId,
-                    onNavigateBack = { viewModel.handleIntent(TimelineIntent.CloseEditorDialog) }
-                )
-            }
+        Dialog(
+            onDismissRequest = { viewModel.handleIntent(TimelineIntent.CloseEditorDialog) },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+            EditorScreen(
+                entryId = state.editingEntryId,
+                viewModelKey = state.editorDialogKey,
+                onNavigateBack = { viewModel.handleIntent(TimelineIntent.CloseEditorDialog) }
+            )
         }
     }
 
@@ -287,12 +312,11 @@ fun TimelineScreen(
 
     // Add Expense Dialog with its own ViewModel
     if (state.showAddExpenseDialog) {
-        key(state.expenseDialogKey) {
-            AddExpenseDialogWithViewModel(
-                onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddExpenseDialog) },
-                onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddExpenseDialog) }
-            )
-        }
+        AddExpenseDialogWithViewModel(
+            key = state.expenseDialogKey,
+            onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddExpenseDialog) },
+            onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddExpenseDialog) }
+        )
     }
 
     // Expense Stats Dialog
@@ -307,22 +331,20 @@ fun TimelineScreen(
 
     // Add Task Dialog with its own ViewModel
     if (state.showAddTaskDialog) {
-        key(state.taskDialogKey) {
-            AddTaskDialogWithViewModel(
-                onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddTaskDialog) },
-                onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddTaskDialog) }
-            )
-        }
+        AddTaskDialogWithViewModel(
+            key = state.taskDialogKey,
+            onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddTaskDialog) },
+            onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddTaskDialog) }
+        )
     }
 
     // Add Video Dialog with its own ViewModel
     if (state.showAddVideoDialog) {
-        key(state.videoDialogKey) {
-            AddVideoDialogWithViewModel(
-                onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddVideoDialog) },
-                onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddVideoDialog) }
-            )
-        }
+        AddVideoDialogWithViewModel(
+            key = state.videoDialogKey,
+            onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddVideoDialog) },
+            onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddVideoDialog) }
+        )
     }
 
     // Video Player Dialog
@@ -335,12 +357,11 @@ fun TimelineScreen(
 
     // Add Food Dialog with its own ViewModel
     if (state.showAddFoodDialog) {
-        key(state.foodDialogKey) {
-            AddFoodDialogWithViewModel(
-                onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) },
-                onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) }
-            )
-        }
+        AddFoodDialogWithViewModel(
+            key = state.foodDialogKey,
+            onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) },
+            onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) }
+        )
     }
 
     // Full Screen Map Dialog
@@ -367,9 +388,10 @@ fun TimelineScreen(
 
 @Composable
 private fun AddExpenseDialogWithViewModel(
-    viewModel: AddExpenseDialogViewModel = hiltViewModel(),
+    key: String,
     onDismiss: () -> Unit,
-    onSaveSuccess: () -> Unit
+    onSaveSuccess: () -> Unit,
+    viewModel: AddExpenseDialogViewModel = hiltViewModel(key = key)
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -395,9 +417,10 @@ private fun AddExpenseDialogWithViewModel(
 
 @Composable
 private fun AddTaskDialogWithViewModel(
-    viewModel: AddTaskDialogViewModel = hiltViewModel(),
+    key: String,
     onDismiss: () -> Unit,
-    onSaveSuccess: () -> Unit
+    onSaveSuccess: () -> Unit,
+    viewModel: AddTaskDialogViewModel = hiltViewModel(key = key)
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -428,9 +451,10 @@ private fun AddTaskDialogWithViewModel(
 
 @Composable
 private fun AddVideoDialogWithViewModel(
-    viewModel: AddVideoDialogViewModel = hiltViewModel(),
+    key: String,
     onDismiss: () -> Unit,
-    onSaveSuccess: () -> Unit
+    onSaveSuccess: () -> Unit,
+    viewModel: AddVideoDialogViewModel = hiltViewModel(key = key)
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -511,17 +535,13 @@ private fun AddVideoDialogWithViewModel(
 
 @Composable
 private fun AddFoodDialogWithViewModel(
-    viewModel: AddFoodDialogViewModel = hiltViewModel(),
+    key: String,
     onDismiss: () -> Unit,
-    onSaveSuccess: () -> Unit
+    onSaveSuccess: () -> Unit,
+    viewModel: AddFoodDialogViewModel = hiltViewModel(key = key)
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-
-    // Clear state when dialog opens
-    LaunchedEffect(Unit) {
-        viewModel.handleIntent(AddFoodDialogIntent.Clear)
-    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -649,7 +669,8 @@ private fun TodaySummaryRow(
     expenses: List<ru.diaries.mydiaries.data.model.Expense>,
     steps: Int,
     isStepCounterRunning: Boolean,
-    onExpenseClick: () -> Unit
+    onExpenseClick: () -> Unit,
+    onStepCardClick: () -> Unit = {}
 ) {
     val total = expenses.sumOf { it.amount }
     val numberFormat = NumberFormat.getInstance(Locale("ru", "RU"))
@@ -659,7 +680,7 @@ private fun TodaySummaryRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -766,7 +787,8 @@ private fun TodaySummaryRow(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            onClick = onStepCardClick
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Accent stripe
@@ -832,15 +854,25 @@ private fun TodaySummaryRow(
                             )
                         }
                         Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = stringResource(
-                                R.string.step_goal_progress,
-                                numberFormat.format(steps),
-                                numberFormat.format(stepGoal)
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    R.string.step_goal_progress,
+                                    numberFormat.format(steps),
+                                    numberFormat.format(stepGoal)
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = stringResource(R.string.view_hourly_chart),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = SageGreen
+                            )
+                        }
                     }
                 }
             }
@@ -851,6 +883,24 @@ private fun TodaySummaryRow(
 private fun formatCurrency(amount: Double): String {
     val format = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
     return format.format(amount)
+}
+
+@Composable
+private fun getGreetingText(): String {
+    val hour = java.time.LocalTime.now().hour
+    return when (hour) {
+        in 5..11 -> stringResource(R.string.greeting_morning)
+        in 12..16 -> stringResource(R.string.greeting_afternoon)
+        in 17..22 -> stringResource(R.string.greeting_evening)
+        else -> stringResource(R.string.greeting_night)
+    }
+}
+
+@Composable
+private fun formatTodayDate(): String {
+    val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
+        .withLocale(Locale.getDefault())
+    return LocalDate.now().format(formatter)
 }
 
 @Composable
@@ -962,7 +1012,7 @@ private fun AnimatedTimelineItem(
                     entry = item.entry,
                     onClick = { onEntryClick(item.entry.id) },
                     onDelete = { onEntryDelete(item.entry.id) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
                 )
             }
             is TimelineItem.ExpensesItem -> {
@@ -970,7 +1020,7 @@ private fun AnimatedTimelineItem(
                 DayExpensesCard(
                     expenses = item.expenses,
                     onDeleteExpense = onExpenseDelete,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                     isExpanded = isCardExpanded(cardId),
                     onToggleExpand = { onToggleCardExpansion(cardId) }
                 )
@@ -981,7 +1031,7 @@ private fun AnimatedTimelineItem(
                     tasks = item.tasks,
                     onToggleTask = onToggleTask,
                     onDeleteTask = onDeleteTask,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                     isExpanded = isCardExpanded(cardId),
                     onToggleExpand = { onToggleCardExpansion(cardId) },
                     cardTitle = stringResource(R.string.tasks_for_day),
@@ -994,7 +1044,7 @@ private fun AnimatedTimelineItem(
                     videos = item.videos,
                     onVideoClick = onVideoClick,
                     onDeleteVideo = onDeleteVideo,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                     isExpanded = isCardExpanded(cardId),
                     onToggleExpand = { onToggleCardExpansion(cardId) },
                     cardTitle = stringResource(R.string.videos_for_day)
@@ -1005,7 +1055,7 @@ private fun AnimatedTimelineItem(
                 DayFoodCard(
                     foodEntries = item.foodEntries,
                     onDeleteFood = onDeleteFood,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                     isExpanded = isCardExpanded(cardId),
                     onToggleExpand = { onToggleCardExpansion(cardId) },
                     cardTitle = stringResource(R.string.food_for_day)
@@ -1017,7 +1067,7 @@ private fun AnimatedTimelineItem(
                     track = item.track,
                     onMapClick = { onTrackMapClick(item.track) },
                     onDelete = { onDeleteTrack(item.track.id) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                     isExpanded = isCardExpanded(cardId),
                     onToggleExpand = { onToggleCardExpansion(cardId) },
                     cardTitle = stringResource(R.string.track_for_day),
@@ -1027,7 +1077,8 @@ private fun AnimatedTimelineItem(
                     stepsLabel = stringResource(R.string.track_steps),
                     kmUnit = stringResource(R.string.track_km),
                     kmhUnit = stringResource(R.string.track_kmh),
-                    trackingActiveText = stringResource(R.string.tracking_active)
+                    trackingActiveText = stringResource(R.string.tracking_active),
+                    mapButtonText = stringResource(R.string.open_map)
                 )
             }
         }

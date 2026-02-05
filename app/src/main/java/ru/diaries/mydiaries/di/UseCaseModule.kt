@@ -8,11 +8,12 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import ru.diaries.mydiaries.data.repository.DiaryRepository
 import ru.diaries.mydiaries.data.repository.ExpenseRepository
 import ru.diaries.mydiaries.domain.usecase.expense.SaveExpenseUseCase
-import ru.diaries.mydiaries.domain.usecase.food.SaveFoodUseCase
-import ru.diaries.mydiaries.domain.usecase.task.SaveTasksUseCase
+import ru.diaries.mydiaries.feature.food.domain.usecase.SaveFoodUseCase
+import ru.diaries.mydiaries.feature.todo.domain.usecase.SaveTasksUseCase
 import ru.diaries.mydiaries.domain.usecase.history.GetHistoryDataUseCase
 import ru.diaries.mydiaries.domain.usecase.timeline.GetTimelineItemsUseCase
-import ru.diaries.mydiaries.domain.usecase.video.SaveVideoUseCase
+import ru.diaries.mydiaries.domain.usecase.statistics.GetStatisticsDataUseCase
+import ru.diaries.mydiaries.feature.video.domain.usecase.SaveVideoUseCase
 import ru.diaries.mydiaries.feature.food.data.repository.FoodRepository
 import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository
 import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
@@ -78,5 +79,15 @@ object UseCaseModule {
         foodRepository: FoodRepository
     ): SaveFoodUseCase {
         return SaveFoodUseCase(foodRepository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetStatisticsDataUseCase(
+        expenseRepository: ExpenseRepository,
+        foodRepository: FoodRepository,
+        trackRepository: TrackRepository
+    ): GetStatisticsDataUseCase {
+        return GetStatisticsDataUseCase(expenseRepository, foodRepository, trackRepository)
     }
 }

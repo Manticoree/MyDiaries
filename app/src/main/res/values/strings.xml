@@ -149,12 +149,18 @@
     <string name="stop_step_counter">Остановить</string>
     <string name="step_counter_active">активен</string>
     <string name="step_goal_progress">%1$s из %2$s</string>
+    <string name="hourly_steps_title">Шаги по часам</string>
+    <string name="hourly_steps_total">Сегодня: %1$s шагов</string>
+    <string name="view_hourly_chart">По часам</string>
+    <string name="notification_steps_today_subtitle">шагов сегодня</string>
+    <string name="notification_step_goal">Цель: %1$s шагов</string>
     <string name="activity_recognition_title">Физическая активность</string>
     <string name="activity_recognition_description">Для подсчёта шагов</string>
 
     <!-- Bottom Navigation -->
     <string name="tab_timeline">Лента</string>
     <string name="tab_history">История</string>
+    <string name="tab_statistics">Статистика</string>
 
     <!-- History Screen -->
     <string name="history_title">История</string>
@@ -171,4 +177,57 @@
     <string name="history_tasks_count">%d зад.</string>
     <string name="history_steps_count">%d шаг.</string>
     <string name="history_day_detail_title">Детали дня</string>
+
+    <!-- Permissions Screen -->
+    <string name="permissions_title">Разрешения</string>
+    <string name="permissions_subtitle">Для полноценной работы приложению нужны следующие разрешения</string>
+    <string name="permissions_all_granted">Все разрешения получены!</string>
+    <string name="permissions_grant_button">Предоставить разрешения</string>
+    <string name="permissions_open_settings">Открыть настройки</string>
+    <string name="permissions_settings_hint">Если разрешения были отклонены, предоставьте их в настройках</string>
+    <string name="permissions_skip">Пропустить</string>
+    <string name="permissions_skip_hint">Вы сможете предоставить разрешения позже</string>
+    <string name="permission_camera_title">Камера</string>
+    <string name="permission_camera_desc">Для фотографирования еды и записи видео</string>
+    <string name="permission_location_title">Геолокация</string>
+    <string name="permission_location_desc">Для записи маршрутов на карте</string>
+    <string name="permission_mic_title">Микрофон</string>
+    <string name="permission_mic_desc">Для записи звука в видео</string>
+    <string name="permission_activity_title">Физическая активность</string>
+    <string name="permission_activity_desc">Для подсчёта шагов</string>
+    <string name="permission_photos_title">Фото</string>
+    <string name="permission_photos_desc">Для выбора фотографий из галереи</string>
+    <string name="permission_videos_title">Видео</string>
+    <string name="permission_videos_desc">Для выбора видео из галереи</string>
+    <string name="permission_notifications_title">Уведомления</string>
+    <string name="permission_notifications_desc">Для напоминаний о записях</string>
+    <string name="permission_media_title">Медиафайлы</string>
+    <string name="permission_media_desc">Для доступа к фото и видео из галереи</string>
+    <string name="permission_status_ok">OK</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_subtitle">Твой личный дневник</string>
+
+    <!-- Statistics -->
+    <string name="statistics_title">Статистика</string>
+    <string name="statistics_expenses_month">Расходы за месяц</string>
+    <string name="statistics_steps_month">Шаги за месяц</string>
+    <string name="statistics_calories_month">Калории за месяц</string>
+    <string name="statistics_activity_month">Активность за месяц</string>
+    <string name="chart_total_format">Всего: %1$s</string>
+    <string name="chart_total_kcal_format">Всего: %1$s ккал</string>
+    <string name="chart_total_steps_format">Всего: %1$s шагов</string>
+    <string name="chart_total_km_format">Всего: %1$s км</string>
+    <string name="chart_avg_kcal_per_day">В среднем: %1$s ккал / день</string>
+    <string name="chart_avg_steps_per_day">В среднем: %1$s / день</string>
+    <string name="chart_avg_km_per_day">В среднем: %1$s км / день</string>
+    <string name="chart_by_category">По категориям</string>
+    <string name="chart_by_day">По дням</string>
+    <string name="unit_kcal">ккал</string>
+    <string name="unit_steps">шагов</string>
+    <string name="unit_km">км</string>
+
+    <!-- Map Dialog -->
+    <string name="map_route_title">Карта маршрута</string>
+    <string name="open_map">Открыть карту</string>
 </resources>

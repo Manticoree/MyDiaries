@@ -35,11 +35,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import ru.diaries.mydiaries.R
 import ru.diaries.mydiaries.ui.theme.DustyRose
 import ru.diaries.mydiaries.ui.theme.GoldenHoney
 import ru.diaries.mydiaries.ui.theme.LavenderMist
@@ -217,7 +219,7 @@ fun SplashScreen(
 
             // Subtitle
             Text(
-                text = "Твой личный дневник",
+                text = stringResource(R.string.splash_subtitle),
                 fontSize = 16.sp,
                 fontStyle = FontStyle.Italic,
                 color = TextSecondary,

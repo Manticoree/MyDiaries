@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.ui.video
+package ru.diaries.mydiaries.feature.video.ui
 
 import android.net.Uri
 

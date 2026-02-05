@@ -19,7 +19,15 @@
       "Bash(.\\\\gradlew.bat assembleDebug:*)",
       "Bash(cmd /c \"gradlew.bat assembleDebug\")",
       "Bash(cmd /c \"gradlew assembleDebug 2>&1\")",
-      "Bash(\"F:\\\\androidprojects\\\\myDiaries\\\\gradlew.bat\" assembleDebug)"
+      "Bash(\"F:\\\\androidprojects\\\\myDiaries\\\\gradlew.bat\" assembleDebug)",
+      "Bash(find:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(python3:*)",
+      "Bash(./gradlew.bat assembleDebug:*)",
+      "Bash(cmd /c \"cd /d F:\\\\androidprojects\\\\myDiaries && gradlew.bat assembleDebug 2>&1\")",
+      "Bash(powershell:*)",
+      "Bash(cmd.exe /c \"gradlew.bat assembleDebug\")",
+      "Bash(java:*)"
     ]
   }
 }

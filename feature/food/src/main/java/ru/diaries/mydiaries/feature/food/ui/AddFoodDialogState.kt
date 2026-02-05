@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.ui.food
+package ru.diaries.mydiaries.feature.food.ui
 
 import android.net.Uri
 import ru.diaries.mydiaries.feature.food.data.model.ServingSize

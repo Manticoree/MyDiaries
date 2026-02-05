@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -48,4 +50,9 @@ dependencies {
     // TensorFlow Lite for Food-101 classification
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.support)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }

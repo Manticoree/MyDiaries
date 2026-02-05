@@ -1,4 +1,4 @@
-package ru.diaries.mydiaries.domain.usecase.video
+package ru.diaries.mydiaries.feature.video.domain.usecase
 
 import ru.diaries.mydiaries.feature.video.data.model.Video
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
