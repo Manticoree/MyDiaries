@@ -1,6 +1,7 @@
 package ru.diaries.mydiaries.ui.timeline
 
 import ru.diaries.mydiaries.feature.video.data.model.Video
+import ru.diaries.mydiaries.feature.workout.data.model.Workout
 import java.time.LocalDate
 
 sealed class TimelineIntent {
@@ -44,6 +45,15 @@ sealed class TimelineIntent {
     data object ShowAddFoodDialog : TimelineIntent()
     data object HideAddFoodDialog : TimelineIntent()
     data class DeleteFood(val id: String) : TimelineIntent()
+
+    // Workout dialog visibility
+    data object ShowAddWorkoutDialog : TimelineIntent()
+    data object HideAddWorkoutDialog : TimelineIntent()
+    data class DeleteWorkout(val id: String) : TimelineIntent()
+    data class OpenWorkoutDetail(val workout: Workout) : TimelineIntent()
+    data object CloseWorkoutDetail : TimelineIntent()
+    data object OpenWorkoutList : TimelineIntent()
+    data object CloseWorkoutList : TimelineIntent()
 
     // Card expansion
     data class ToggleCardExpansion(val cardId: String) : TimelineIntent()

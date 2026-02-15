@@ -23,6 +23,8 @@ import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
 import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import ru.diaries.mydiaries.feature.video.data.model.Video
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
+import ru.diaries.mydiaries.feature.workout.data.model.Workout
+import ru.diaries.mydiaries.feature.workout.data.repository.WorkoutRepository
 import ru.diaries.mydiaries.service.LocationTrackingService
 import ru.diaries.mydiaries.service.StepCounterService
 import java.time.LocalDate
@@ -37,7 +39,8 @@ class TimelineViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val videoRepository: VideoRepository,
     private val foodRepository: FoodRepository,
-    private val trackRepository: TrackRepository
+    private val trackRepository: TrackRepository,
+    private val workoutRepository: WorkoutRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TimelineState())
@@ -112,6 +115,14 @@ class TimelineViewModel @Inject constructor(
             is TimelineIntent.HideAddFoodDialog -> hideAddFoodDialog()
             is TimelineIntent.DeleteFood -> deleteFood(intent.id)
 
+            is TimelineIntent.ShowAddWorkoutDialog -> showAddWorkoutDialog()
+            is TimelineIntent.HideAddWorkoutDialog -> hideAddWorkoutDialog()
+            is TimelineIntent.DeleteWorkout -> deleteWorkout(intent.id)
+            is TimelineIntent.OpenWorkoutDetail -> openWorkoutDetail(intent.workout)
+            is TimelineIntent.CloseWorkoutDetail -> closeWorkoutDetail()
+            is TimelineIntent.OpenWorkoutList -> openWorkoutList()
+            is TimelineIntent.CloseWorkoutList -> closeWorkoutList()
+
             is TimelineIntent.ToggleCardExpansion -> toggleCardExpansion(intent.cardId)
 
             is TimelineIntent.ToggleTracking -> toggleTracking()
@@ -128,7 +139,7 @@ class TimelineViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
                 .collect { data ->
-                    val grouped = groupItemsByDate(data.entries, data.expenses, data.tasks, data.videos, data.foodEntries, data.tracks)
+                    val grouped = groupItemsByDate(data.entries, data.expenses, data.tasks, data.videos, data.foodEntries, data.tracks, data.workouts)
                     _state.update {
                         it.copy(
                             entries = data.entries,
@@ -138,6 +149,7 @@ class TimelineViewModel @Inject constructor(
                             todayVideos = data.todayVideos,
                             todayFoodEntries = data.todayFoodEntries,
                             todayTrack = data.todayTrack,
+                            todayWorkouts = data.todayWorkouts,
                             isLoading = false
                         )
                     }
@@ -151,9 +163,10 @@ class TimelineViewModel @Inject constructor(
         tasks: List<Task>,
         videos: List<Video>,
         foodEntries: List<FoodEntry>,
-        tracks: List<DailyTrack>
+        tracks: List<DailyTrack>,
+        workouts: List<Workout> = emptyList()
     ): List<DateGroup> {
-        val allDates = (entries.map { it.date } + expenses.map { it.date } + tasks.map { it.date } + videos.map { it.date } + foodEntries.map { it.date } + tracks.map { it.date }).distinct()
+        val allDates = (entries.map { it.date } + expenses.map { it.date } + tasks.map { it.date } + videos.map { it.date } + foodEntries.map { it.date } + tracks.map { it.date } + workouts.map { it.date }).distinct()
         val today = LocalDate.now()
 
         return allDates.map { date ->
@@ -196,10 +209,17 @@ class TimelineViewModel @Inject constructor(
                 emptyList()
             }
 
+            val dayWorkouts = workouts.filter { it.date == date }
+            val workoutItem = if (dayWorkouts.isNotEmpty()) {
+                listOf(TimelineItem.WorkoutItem(dayWorkouts))
+            } else {
+                emptyList()
+            }
+
             val existingGroup = _state.value.groupedEntries.find { it.date == date }
             DateGroup(
                 date = date,
-                items = trackItem + tasksItem + foodItem + videosItem + diaryItems + expensesItem,
+                items = trackItem + workoutItem + tasksItem + foodItem + videosItem + diaryItems + expensesItem,
                 isExpanded = existingGroup?.isExpanded ?: (date == today)
             )
         }.sortedByDescending { it.date }
@@ -384,5 +404,40 @@ class TimelineViewModel @Inject constructor(
         viewModelScope.launch {
             trackRepository.deleteTrack(id)
         }
+    }
+
+    private fun showAddWorkoutDialog() {
+        _state.update {
+            it.copy(
+                showAddWorkoutDialog = true,
+                workoutDialogKey = "workout_${System.currentTimeMillis()}"
+            )
+        }
+    }
+
+    private fun hideAddWorkoutDialog() {
+        _state.update { it.copy(showAddWorkoutDialog = false, workoutDialogKey = "") }
+    }
+
+    private fun deleteWorkout(id: String) {
+        viewModelScope.launch {
+            workoutRepository.deleteWorkout(id)
+        }
+    }
+
+    private fun openWorkoutDetail(workout: Workout) {
+        _state.update { it.copy(activeWorkout = workout) }
+    }
+
+    private fun closeWorkoutDetail() {
+        _state.update { it.copy(activeWorkout = null) }
+    }
+
+    private fun openWorkoutList() {
+        _state.update { it.copy(showWorkoutListScreen = true) }
+    }
+
+    private fun closeWorkoutList() {
+        _state.update { it.copy(showWorkoutListScreen = false) }
     }
 }

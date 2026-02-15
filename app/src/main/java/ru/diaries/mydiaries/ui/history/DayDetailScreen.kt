@@ -113,8 +113,7 @@ fun DayDetailScreen(
                     stepsLabel = stringResource(R.string.track_steps),
                     kmUnit = stringResource(R.string.track_km),
                     kmhUnit = stringResource(R.string.track_kmh),
-                    trackingActiveText = stringResource(R.string.tracking_active),
-                    mapButtonText = stringResource(R.string.open_map)
+                    trackingActiveText = stringResource(R.string.tracking_active)
                 )
             }
 

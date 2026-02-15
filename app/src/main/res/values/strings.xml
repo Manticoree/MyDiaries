@@ -123,6 +123,12 @@
     <string name="food_for_day">Еда за день</string>
     <string name="delete_food">Удалить</string>
 
+    <!-- Workout -->
+    <string name="add_workout">Тренировка</string>
+    <string name="add_workout_description">Записать тренировку с упражнениями</string>
+    <string name="workouts_for_day">Тренировки за день</string>
+    <string name="delete_workout">Удалить тренировку</string>
+
     <!-- Track / Route -->
     <string name="start_tracking">Начать маршрут</string>
     <string name="stop_tracking">Остановить</string>
@@ -161,6 +167,7 @@
     <string name="tab_timeline">Лента</string>
     <string name="tab_history">История</string>
     <string name="tab_statistics">Статистика</string>
+    <string name="tab_features">Функции</string>
 
     <!-- History Screen -->
     <string name="history_title">История</string>

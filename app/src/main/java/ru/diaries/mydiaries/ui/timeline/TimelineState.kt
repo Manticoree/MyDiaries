@@ -6,6 +6,7 @@ import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.todo.data.model.Task
 import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
 import ru.diaries.mydiaries.feature.video.data.model.Video
+import ru.diaries.mydiaries.feature.workout.data.model.Workout
 
 data class TimelineState(
     // Timeline data
@@ -15,6 +16,7 @@ data class TimelineState(
     val todayTasks: List<Task> = emptyList(),
     val todayVideos: List<Video> = emptyList(),
     val todayFoodEntries: List<FoodEntry> = emptyList(),
+    val todayWorkouts: List<Workout> = emptyList(),
 
     // Card expansion states (key: "type_date", e.g. "tasks_2024-01-15")
     val cardExpandedStates: Map<String, Boolean> = emptyMap(),
@@ -38,6 +40,10 @@ data class TimelineState(
     val playingVideo: Video? = null,
     val showAddFoodDialog: Boolean = false,
     val foodDialogKey: String = "",
+    val showAddWorkoutDialog: Boolean = false,
+    val workoutDialogKey: String = "",
+    val activeWorkout: Workout? = null,
+    val showWorkoutListScreen: Boolean = false,
 
     // Track state
     val todayTrack: DailyTrack? = null,

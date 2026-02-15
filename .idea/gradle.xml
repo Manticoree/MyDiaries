@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/feature/todo" />
             <option value="$PROJECT_DIR$/feature/track" />
             <option value="$PROJECT_DIR$/feature/video" />
+            <option value="$PROJECT_DIR$/feature/workout" />
           </set>
         </option>
       </GradleProjectSettings>

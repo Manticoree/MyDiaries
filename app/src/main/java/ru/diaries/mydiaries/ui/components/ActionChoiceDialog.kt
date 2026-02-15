@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.Videocam
@@ -60,6 +61,7 @@ fun ActionChoiceDialog(
     onAddTask: () -> Unit,
     onAddVideo: () -> Unit,
     onAddFood: () -> Unit,
+    onAddWorkout: () -> Unit,
     onToggleTracking: () -> Unit,
     isTracking: Boolean,
     onDismiss: () -> Unit
@@ -193,6 +195,19 @@ fun ActionChoiceDialog(
                     onClick = {
                         onDismiss()
                         onAddFood()
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ActionItemCard(
+                    icon = Icons.Outlined.FitnessCenter,
+                    title = stringResource(R.string.add_workout),
+                    subtitle = stringResource(R.string.add_workout_description),
+                    gradientColors = listOf(Terracotta, LavenderMist),
+                    onClick = {
+                        onDismiss()
+                        onAddWorkout()
                     }
                 )
 

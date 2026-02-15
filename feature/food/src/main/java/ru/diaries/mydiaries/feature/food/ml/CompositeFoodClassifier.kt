@@ -3,13 +3,19 @@ package ru.diaries.mydiaries.feature.food.ml
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import ru.diaries.mydiaries.feature.food.data.api.GroqApi
 
 /**
- * Composite food classifier that tries TFLite Food-101 model first,
- * falls back to ML Kit on error.
+ * Composite food classifier with priority chain: Groq → TFLite → ML Kit.
+ * Falls back to next classifier if the current one fails.
  */
-class CompositeFoodClassifier(private val context: Context) : FoodClassifierContract {
+class CompositeFoodClassifier(
+    private val context: Context,
+    private val groqApi: GroqApi? = null,
+    private val groqApiKey: String = ""
+) : FoodClassifierContract {
 
+    private var groqClassifier: GroqFoodClassifier? = null
     private var tfliteClassifier: TFLiteFoodClassifier? = null
     private var mlKitClassifier: FoodClassifier? = null
     private var useTFLite = true
@@ -19,7 +25,11 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
     }
 
     override fun initialize(): Boolean {
-        // Try to initialize TFLite classifier first
+        if (groqApi != null && groqApiKey.isNotBlank()) {
+            groqClassifier = GroqFoodClassifier(groqApi, groqApiKey)
+            Log.d(TAG, "Groq classifier initialized")
+        }
+
         tfliteClassifier = TFLiteFoodClassifier(context)
         val tfliteInitialized = tfliteClassifier?.initialize() == true
 
@@ -29,7 +39,6 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
             return true
         }
 
-        // Fall back to ML Kit
         Log.w(TAG, "TFLite initialization failed, falling back to ML Kit")
         useTFLite = false
         mlKitClassifier = FoodClassifier(context)
@@ -37,6 +46,7 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
     }
 
     override fun isReady(): Boolean {
+        if (groqClassifier != null) return true
         return if (useTFLite) {
             tfliteClassifier?.isReady() == true
         } else {
@@ -45,6 +55,7 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
     }
 
     override fun needsDownload(): Boolean {
+        if (groqClassifier != null) return false
         return if (useTFLite) {
             tfliteClassifier?.needsDownload() == true
         } else {
@@ -53,6 +64,21 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
     }
 
     override suspend fun classifyAsync(bitmap: Bitmap): List<FoodPrediction> {
+        // Try Groq first
+        if (groqClassifier != null) {
+            try {
+                val results = groqClassifier?.classifyAsync(bitmap) ?: emptyList()
+                if (results.isNotEmpty()) {
+                    Log.d(TAG, "Groq returned ${results.size} predictions")
+                    return results
+                }
+                Log.w(TAG, "Groq returned empty results, trying local classifiers")
+            } catch (e: Exception) {
+                Log.e(TAG, "Groq classification failed, falling back to local", e)
+            }
+        }
+
+        // Try TFLite
         if (useTFLite && tfliteClassifier?.isReady() == true) {
             try {
                 val results = tfliteClassifier?.classifyAsync(bitmap) ?: emptyList()
@@ -70,6 +96,7 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
     }
 
     override fun classify(bitmap: Bitmap): List<FoodPrediction> {
+        // Groq only supports async, skip it in sync path
         if (useTFLite && tfliteClassifier?.isReady() == true) {
             try {
                 val results = tfliteClassifier?.classify(bitmap) ?: emptyList()
@@ -82,7 +109,6 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
             }
         }
 
-        // Fallback to ML Kit
         return getOrCreateMLKitClassifier().classify(bitmap)
     }
 
@@ -94,6 +120,8 @@ class CompositeFoodClassifier(private val context: Context) : FoodClassifierCont
     }
 
     override fun close() {
+        groqClassifier?.close()
+        groqClassifier = null
         tfliteClassifier?.close()
         tfliteClassifier = null
         mlKitClassifier?.close()

@@ -100,6 +100,17 @@ import ru.diaries.mydiaries.feature.food.ui.AddFoodDialogViewModel
 import ru.diaries.mydiaries.feature.video.ui.AddVideoDialogEffect
 import ru.diaries.mydiaries.feature.video.ui.AddVideoDialogIntent
 import ru.diaries.mydiaries.feature.video.ui.AddVideoDialogViewModel
+import ru.diaries.mydiaries.feature.workout.data.model.Workout
+import ru.diaries.mydiaries.feature.workout.ui.AddWorkoutDialog
+import ru.diaries.mydiaries.feature.workout.ui.AddWorkoutDialogEffect
+import ru.diaries.mydiaries.feature.workout.ui.AddWorkoutDialogIntent
+import ru.diaries.mydiaries.feature.workout.ui.AddWorkoutDialogViewModel
+import ru.diaries.mydiaries.feature.workout.ui.DayWorkoutCard
+import ru.diaries.mydiaries.feature.workout.ui.WorkoutScreenDialog
+import ru.diaries.mydiaries.feature.workout.ui.WorkoutScreenViewModel
+import ru.diaries.mydiaries.feature.workout.ui.hub.WorkoutHubScreen
+import ru.diaries.mydiaries.feature.workout.ui.list.WorkoutListScreen
+import ru.diaries.mydiaries.feature.workout.ui.list.WorkoutListViewModel
 import ru.diaries.mydiaries.ui.theme.GoldenHoney
 import ru.diaries.mydiaries.ui.theme.NumberStyle
 import ru.diaries.mydiaries.ui.theme.SageGreen
@@ -261,6 +272,15 @@ fun TimelineScreen(
                                         onDeleteTrack = { trackId ->
                                             viewModel.handleIntent(TimelineIntent.DeleteTrack(trackId))
                                         },
+                                        onWorkoutClick = { workout ->
+                                            viewModel.handleIntent(TimelineIntent.OpenWorkoutDetail(workout))
+                                        },
+                                        onDeleteWorkout = { workoutId ->
+                                            viewModel.handleIntent(TimelineIntent.DeleteWorkout(workoutId))
+                                        },
+                                        onWorkoutHeaderClick = {
+                                            viewModel.handleIntent(TimelineIntent.OpenWorkoutList)
+                                        },
                                         isCardExpanded = { cardId -> state.isCardExpanded(cardId) },
                                         onToggleCardExpansion = { cardId ->
                                             viewModel.handleIntent(TimelineIntent.ToggleCardExpansion(cardId))
@@ -304,6 +324,7 @@ fun TimelineScreen(
             onAddTask = { viewModel.handleIntent(TimelineIntent.ShowAddTaskDialog) },
             onAddVideo = { viewModel.handleIntent(TimelineIntent.ShowAddVideoDialog) },
             onAddFood = { viewModel.handleIntent(TimelineIntent.ShowAddFoodDialog) },
+            onAddWorkout = { viewModel.handleIntent(TimelineIntent.ShowAddWorkoutDialog) },
             onToggleTracking = { viewModel.handleIntent(TimelineIntent.ToggleTracking) },
             isTracking = state.isTracking,
             onDismiss = { viewModel.handleIntent(TimelineIntent.HideActionChoiceDialog) }
@@ -361,6 +382,34 @@ fun TimelineScreen(
             key = state.foodDialogKey,
             onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) },
             onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddFoodDialog) }
+        )
+    }
+
+    // Add Workout Dialog
+    if (state.showAddWorkoutDialog) {
+        AddWorkoutDialogWithViewModel(
+            key = state.workoutDialogKey,
+            onDismiss = { viewModel.handleIntent(TimelineIntent.HideAddWorkoutDialog) },
+            onSaveSuccess = { viewModel.handleIntent(TimelineIntent.HideAddWorkoutDialog) }
+        )
+    }
+
+    // Workout Detail Screen
+    state.activeWorkout?.let { workout ->
+        val workoutScreenViewModel: WorkoutScreenViewModel = hiltViewModel(
+            key = "workout_screen_${workout.id}"
+        )
+        WorkoutScreenDialog(
+            workout = workout,
+            viewModel = workoutScreenViewModel,
+            onDismiss = { viewModel.handleIntent(TimelineIntent.CloseWorkoutDetail) }
+        )
+    }
+
+    // Workout Hub Screen
+    if (state.showWorkoutListScreen) {
+        WorkoutHubScreen(
+            onDismiss = { viewModel.handleIntent(TimelineIntent.CloseWorkoutList) }
         )
     }
 
@@ -621,6 +670,30 @@ private fun AddFoodDialogWithViewModel(
         saveText = stringResource(R.string.add),
         cancelText = stringResource(R.string.cancel),
         retryText = stringResource(R.string.retry)
+    )
+}
+
+@Composable
+private fun AddWorkoutDialogWithViewModel(
+    key: String,
+    onDismiss: () -> Unit,
+    onSaveSuccess: () -> Unit,
+    viewModel: AddWorkoutDialogViewModel = hiltViewModel(key = key)
+) {
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                AddWorkoutDialogEffect.SaveSuccess -> onSaveSuccess()
+            }
+        }
+    }
+
+    AddWorkoutDialog(
+        state = state,
+        onIntent = { viewModel.handleIntent(it) },
+        onDismiss = onDismiss
     )
 }
 
@@ -917,6 +990,9 @@ private fun AnimatedItemsColumn(
     onDeleteFood: (String) -> Unit = {},
     onTrackMapClick: (DailyTrack) -> Unit = {},
     onDeleteTrack: (String) -> Unit = {},
+    onWorkoutClick: (Workout) -> Unit = {},
+    onDeleteWorkout: (String) -> Unit = {},
+    onWorkoutHeaderClick: () -> Unit = {},
     isCardExpanded: (String) -> Boolean = { true },
     onToggleCardExpansion: (String) -> Unit = {}
 ) {
@@ -957,6 +1033,9 @@ private fun AnimatedItemsColumn(
                         onDeleteFood = onDeleteFood,
                         onTrackMapClick = onTrackMapClick,
                         onDeleteTrack = onDeleteTrack,
+                        onWorkoutClick = onWorkoutClick,
+                        onDeleteWorkout = onDeleteWorkout,
+                        onWorkoutHeaderClick = onWorkoutHeaderClick,
                         isCardExpanded = isCardExpanded,
                         onToggleCardExpansion = onToggleCardExpansion
                     )
@@ -980,6 +1059,9 @@ private fun AnimatedTimelineItem(
     onDeleteFood: (String) -> Unit = {},
     onTrackMapClick: (DailyTrack) -> Unit = {},
     onDeleteTrack: (String) -> Unit = {},
+    onWorkoutClick: (Workout) -> Unit = {},
+    onDeleteWorkout: (String) -> Unit = {},
+    onWorkoutHeaderClick: () -> Unit = {},
     isCardExpanded: (String) -> Boolean = { true },
     onToggleCardExpansion: (String) -> Unit = {}
 ) {
@@ -1077,8 +1159,19 @@ private fun AnimatedTimelineItem(
                     stepsLabel = stringResource(R.string.track_steps),
                     kmUnit = stringResource(R.string.track_km),
                     kmhUnit = stringResource(R.string.track_kmh),
-                    trackingActiveText = stringResource(R.string.tracking_active),
-                    mapButtonText = stringResource(R.string.open_map)
+                    trackingActiveText = stringResource(R.string.tracking_active)
+                )
+            }
+            is TimelineItem.WorkoutItem -> {
+                val cardId = "workout_${item.date}"
+                DayWorkoutCard(
+                    workouts = item.workouts,
+                    onWorkoutClick = onWorkoutClick,
+                    onDeleteWorkout = { onDeleteWorkout(it) },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                    isExpanded = isCardExpanded(cardId),
+                    onToggleExpand = { onToggleCardExpansion(cardId) },
+                    onHeaderClick = onWorkoutHeaderClick
                 )
             }
         }

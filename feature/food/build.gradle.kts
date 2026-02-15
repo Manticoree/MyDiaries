@@ -51,6 +51,10 @@ dependencies {
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.support)
 
+    // Retrofit for Groq API
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

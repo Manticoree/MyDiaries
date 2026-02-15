@@ -27,7 +27,19 @@
       "Bash(cmd /c \"cd /d F:\\\\androidprojects\\\\myDiaries && gradlew.bat assembleDebug 2>&1\")",
       "Bash(powershell:*)",
       "Bash(cmd.exe /c \"gradlew.bat assembleDebug\")",
-      "Bash(java:*)"
+      "Bash(java:*)",
+      "Bash(./gradlew :feature:track:compileDebugKotlin:*)",
+      "WebFetch(domain:wger.de)",
+      "Bash(git log:*)",
+      "Bash(xargs:*)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(cmd.exe /c \"gradlew.bat assembleDebug 2>&1\")",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Java/jdk-17\")",
+      "Bash(bash gradlew:*)",
+      "WebFetch(domain:mvnrepository.com)",
+      "WebFetch(domain:wger.readthedocs.io)",
+      "WebFetch(domain:v2.exercisedb.io)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

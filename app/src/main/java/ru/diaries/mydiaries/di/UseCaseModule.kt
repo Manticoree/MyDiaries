@@ -18,6 +18,7 @@ import ru.diaries.mydiaries.feature.food.data.repository.FoodRepository
 import ru.diaries.mydiaries.feature.todo.data.repository.TaskRepository
 import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
+import ru.diaries.mydiaries.feature.workout.data.repository.WorkoutRepository
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -31,9 +32,10 @@ object UseCaseModule {
         taskRepository: TaskRepository,
         videoRepository: VideoRepository,
         foodRepository: FoodRepository,
-        trackRepository: TrackRepository
+        trackRepository: TrackRepository,
+        workoutRepository: WorkoutRepository
     ): GetTimelineItemsUseCase {
-        return GetTimelineItemsUseCase(diaryRepository, expenseRepository, taskRepository, videoRepository, foodRepository, trackRepository)
+        return GetTimelineItemsUseCase(diaryRepository, expenseRepository, taskRepository, videoRepository, foodRepository, trackRepository, workoutRepository)
     }
 
     @Provides

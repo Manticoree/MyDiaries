@@ -6,6 +6,7 @@ import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.todo.data.model.Task
 import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
 import ru.diaries.mydiaries.feature.video.data.model.Video
+import ru.diaries.mydiaries.feature.workout.data.model.Workout
 import java.time.LocalDate
 
 sealed class TimelineItem {
@@ -46,5 +47,12 @@ sealed class TimelineItem {
     data class TrackItem(val track: DailyTrack) : TimelineItem() {
         override val id: String get() = "track_${track.date}"
         override val date: LocalDate get() = track.date
+    }
+
+    data class WorkoutItem(val workouts: List<Workout>) : TimelineItem() {
+        override val id: String get() = "workout_${workouts.firstOrNull()?.date ?: LocalDate.now()}"
+        override val date: LocalDate get() = workouts.firstOrNull()?.date ?: LocalDate.now()
+        val totalExercises: Int get() = workouts.sumOf { it.exercises.size }
+        val totalDuration: Int get() = workouts.sumOf { it.durationMinutes }
     }
 }

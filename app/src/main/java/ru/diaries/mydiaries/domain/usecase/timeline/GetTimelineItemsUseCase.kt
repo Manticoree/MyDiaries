@@ -14,6 +14,8 @@ import ru.diaries.mydiaries.feature.track.data.model.DailyTrack
 import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import ru.diaries.mydiaries.feature.video.data.model.Video
 import ru.diaries.mydiaries.feature.video.data.repository.VideoRepository
+import ru.diaries.mydiaries.feature.workout.data.model.Workout
+import ru.diaries.mydiaries.feature.workout.data.repository.WorkoutRepository
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -24,11 +26,13 @@ data class TimelineData(
     val videos: List<Video>,
     val foodEntries: List<FoodEntry>,
     val tracks: List<DailyTrack>,
+    val workouts: List<Workout>,
     val todayExpenses: List<Expense>,
     val todayTasks: List<Task>,
     val todayVideos: List<Video>,
     val todayFoodEntries: List<FoodEntry>,
-    val todayTrack: DailyTrack?
+    val todayTrack: DailyTrack?,
+    val todayWorkouts: List<Workout>
 )
 
 class GetTimelineItemsUseCase @Inject constructor(
@@ -37,7 +41,8 @@ class GetTimelineItemsUseCase @Inject constructor(
     private val taskRepository: TaskRepository,
     private val videoRepository: VideoRepository,
     private val foodRepository: FoodRepository,
-    private val trackRepository: TrackRepository
+    private val trackRepository: TrackRepository,
+    private val workoutRepository: WorkoutRepository
 ) {
     operator fun invoke(): Flow<TimelineData> {
         val firstFive = combine(
@@ -50,7 +55,14 @@ class GetTimelineItemsUseCase @Inject constructor(
             FiveFlowResult(entries, expenses, tasks, videos, foodEntries)
         }
 
-        return combine(firstFive, trackRepository.getAllTracks()) { five, tracks ->
+        val secondTwo = combine(
+            trackRepository.getAllTracks(),
+            workoutRepository.getAllWorkouts()
+        ) { tracks, workouts ->
+            TwoFlowResult(tracks, workouts)
+        }
+
+        return combine(firstFive, secondTwo) { five, two ->
             val today = LocalDate.now()
             val sortedEntries = five.entries.sortedByDescending { it.date }
 
@@ -60,12 +72,14 @@ class GetTimelineItemsUseCase @Inject constructor(
                 tasks = five.tasks,
                 videos = five.videos,
                 foodEntries = five.foodEntries,
-                tracks = tracks,
+                tracks = two.tracks,
+                workouts = two.workouts,
                 todayExpenses = five.expenses.filter { it.date == today },
                 todayTasks = five.tasks.filter { it.date == today },
                 todayVideos = five.videos.filter { it.date == today },
                 todayFoodEntries = five.foodEntries.filter { it.date == today },
-                todayTrack = tracks.find { it.date == today }
+                todayTrack = two.tracks.find { it.date == today },
+                todayWorkouts = two.workouts.filter { it.date == today }
             )
         }
     }
@@ -76,5 +90,10 @@ class GetTimelineItemsUseCase @Inject constructor(
         val tasks: List<Task>,
         val videos: List<Video>,
         val foodEntries: List<FoodEntry>
+    )
+
+    private data class TwoFlowResult(
+        val tracks: List<DailyTrack>,
+        val workouts: List<Workout>
     )
 }

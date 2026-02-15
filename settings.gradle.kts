@@ -25,4 +25,5 @@ include(":feature:todo")
 include(":feature:video")
 include(":feature:food")
 include(":feature:track")
+include(":feature:workout")
  

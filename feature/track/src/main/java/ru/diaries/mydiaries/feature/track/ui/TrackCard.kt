@@ -15,14 +15,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,10 +49,10 @@ fun DayTrackCard(
     stepsLabel: String = "Шаги",
     kmUnit: String = "км",
     kmhUnit: String = "км/ч",
-    trackingActiveText: String = "Запись идёт…",
-    mapButtonText: String = "Открыть карту"
+    trackingActiveText: String = "Запись идёт…"
 ) {
     Card(
+        onClick = { if (track.points.isNotEmpty()) onMapClick() },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
@@ -92,6 +91,15 @@ fun DayTrackCard(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+
+                if (track.points.isNotEmpty()) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -134,24 +142,6 @@ fun DayTrackCard(
                         kmUnit = kmUnit,
                         kmhUnit = kmhUnit
                     )
-
-                    if (track.points.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        FilledTonalButton(
-                            onClick = onMapClick,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Map,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = mapButtonText)
-                        }
-                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 

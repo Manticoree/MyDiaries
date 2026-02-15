@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -43,6 +44,7 @@ import ru.diaries.mydiaries.ui.splash.SplashScreen
 import ru.diaries.mydiaries.ui.statistics.StatisticsScreen
 import ru.diaries.mydiaries.ui.statistics.charts.HourlyStepsChartScreen
 import ru.diaries.mydiaries.ui.theme.MyDiariesTheme
+import ru.diaries.mydiaries.ui.features.FeaturesScreen
 import ru.diaries.mydiaries.ui.timeline.TimelineScreen
 
 @AndroidEntryPoint
@@ -163,6 +165,23 @@ class MainActivity : ComponentActivity() {
                                         },
                                         colors = navItemColors
                                     )
+                                    NavigationBarItem(
+                                        selected = selectedTab == 3,
+                                        onClick = { selectedTab = 3 },
+                                        icon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Widgets,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                text = stringResource(R.string.tab_features),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        colors = navItemColors
+                                    )
                                 }
                             }
                         ) { innerPadding ->
@@ -178,6 +197,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                     1 -> HistoryScreen()
                                     2 -> StatisticsScreen()
+                                    3 -> FeaturesScreen()
                                 }
                             }
                         }

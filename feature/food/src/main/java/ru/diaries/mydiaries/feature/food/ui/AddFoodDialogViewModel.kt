@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.diaries.mydiaries.feature.food.data.api.GroqApi
 import ru.diaries.mydiaries.feature.food.domain.usecase.SaveFoodUseCase
 import ru.diaries.mydiaries.feature.food.data.model.FoodEntry
 import ru.diaries.mydiaries.feature.food.data.model.ServingSize
@@ -25,11 +26,14 @@ import ru.diaries.mydiaries.feature.food.ml.FoodClassifierContract
 import ru.diaries.mydiaries.feature.food.ml.FoodPrediction
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class AddFoodDialogViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val saveFoodUseCase: SaveFoodUseCase
+    private val saveFoodUseCase: SaveFoodUseCase,
+    private val groqApi: GroqApi,
+    @Named("groq_api_key") private val groqApiKey: String
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddFoodDialogState())
@@ -46,10 +50,9 @@ class AddFoodDialogViewModel @Inject constructor(
 
     private fun initializeClassifier() {
         viewModelScope.launch(Dispatchers.IO) {
-            val classifier = CompositeFoodClassifier(context)
+            val classifier = CompositeFoodClassifier(context, groqApi, groqApiKey)
             foodClassifier = classifier
 
-            // Initialize classifier (tries TFLite first, falls back to ML Kit)
             classifier.initialize()
         }
     }
@@ -88,7 +91,7 @@ class AddFoodDialogViewModel @Inject constructor(
     private suspend fun analyzeImage(uri: Uri) {
         withContext(Dispatchers.IO) {
             try {
-                val classifier = foodClassifier ?: CompositeFoodClassifier(context).apply {
+                val classifier = foodClassifier ?: CompositeFoodClassifier(context, groqApi, groqApiKey).apply {
                     initialize()
                 }.also { foodClassifier = it }
 
@@ -97,7 +100,7 @@ class AddFoodDialogViewModel @Inject constructor(
                 inputStream?.close()
 
                 if (bitmap != null) {
-                    val predictions = classifier.classify(bitmap)
+                    val predictions = classifier.classifyAsync(bitmap)
                     bitmap.recycle()
 
                     if (predictions.isEmpty()) {
