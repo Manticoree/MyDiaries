@@ -8,6 +8,7 @@ import java.time.LocalDate
 interface TrackRepository {
     fun getAllTracks(): Flow<List<DailyTrack>>
     fun getTrackByDate(date: LocalDate): Flow<DailyTrack?>
+    suspend fun getDailyTrack(date: LocalDate): DailyTrack?
     suspend fun addLocationPoint(date: LocalDate, point: LocationPoint)
     suspend fun finalizeTrack(date: LocalDate)
     suspend fun deleteTrack(id: String)

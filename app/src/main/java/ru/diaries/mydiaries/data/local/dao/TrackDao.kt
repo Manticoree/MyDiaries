@@ -41,4 +41,7 @@ interface TrackDao {
 
     @Query("UPDATE daily_tracks SET steps = :steps WHERE date = :date")
     suspend fun updateStepsByDate(date: String, steps: Int)
+
+    @Query("SELECT * FROM daily_tracks WHERE date >= :startDate ORDER BY date DESC")
+    fun getTracksSince(startDate: String): Flow<List<DailyTrackEntity>>
 }

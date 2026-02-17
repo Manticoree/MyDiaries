@@ -8,12 +8,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.diaries.mydiaries.data.local.DiaryDatabase
+import ru.diaries.mydiaries.data.local.dao.AchievementDao
 import ru.diaries.mydiaries.data.local.dao.DiaryDao
 import ru.diaries.mydiaries.data.local.dao.ExpenseDao
 import ru.diaries.mydiaries.data.local.dao.FoodDao
 import ru.diaries.mydiaries.data.local.dao.PhotoDao
 import ru.diaries.mydiaries.data.local.dao.TaskDao
 import ru.diaries.mydiaries.data.local.dao.TrackDao
+import ru.diaries.mydiaries.data.local.dao.UserProfileDao
 import ru.diaries.mydiaries.data.local.dao.VideoDao
 import ru.diaries.mydiaries.data.local.dao.WorkoutDao
 import javax.inject.Singleton
@@ -82,5 +84,17 @@ object DatabaseModule {
     @Singleton
     fun provideWorkoutDao(database: DiaryDatabase): WorkoutDao {
         return database.workoutDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAchievementDao(database: DiaryDatabase): AchievementDao {
+        return database.achievementDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserProfileDao(database: DiaryDatabase): UserProfileDao {
+        return database.userProfileDao()
     }
 }

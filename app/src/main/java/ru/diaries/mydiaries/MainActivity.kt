@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Icon
@@ -40,9 +41,11 @@ import ru.diaries.mydiaries.service.StepCounterService
 import ru.diaries.mydiaries.ui.history.HistoryScreen
 import ru.diaries.mydiaries.ui.permissions.PermissionsScreen
 import ru.diaries.mydiaries.ui.permissions.checkAllPermissionsGranted
+import ru.diaries.mydiaries.ui.profile.ProfileScreen
 import ru.diaries.mydiaries.ui.splash.SplashScreen
 import ru.diaries.mydiaries.ui.statistics.StatisticsScreen
 import ru.diaries.mydiaries.ui.statistics.charts.HourlyStepsChartScreen
+import ru.diaries.mydiaries.ui.achievements.AchievementsScreen
 import ru.diaries.mydiaries.ui.theme.MyDiariesTheme
 import ru.diaries.mydiaries.ui.features.FeaturesScreen
 import ru.diaries.mydiaries.ui.timeline.TimelineScreen
@@ -52,6 +55,7 @@ class MainActivity : ComponentActivity() {
 
     private var keepSplashOnScreen = true
     private val showHourlyStepsChart = mutableStateOf(false)
+    private val showAchievements = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen before super.onCreate
@@ -153,6 +157,23 @@ class MainActivity : ComponentActivity() {
                                         onClick = { selectedTab = 2 },
                                         icon = {
                                             Icon(
+                                                imageVector = Icons.Outlined.Widgets,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                text = "Функции",
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        colors = navItemColors
+                                    )
+                                    NavigationBarItem(
+                                        selected = selectedTab == 3,
+                                        onClick = { selectedTab = 3 },
+                                        icon = {
+                                            Icon(
                                                 imageVector = Icons.Outlined.BarChart,
                                                 contentDescription = null
                                             )
@@ -166,17 +187,17 @@ class MainActivity : ComponentActivity() {
                                         colors = navItemColors
                                     )
                                     NavigationBarItem(
-                                        selected = selectedTab == 3,
-                                        onClick = { selectedTab = 3 },
+                                        selected = selectedTab == 4,
+                                        onClick = { selectedTab = 4 },
                                         icon = {
                                             Icon(
-                                                imageVector = Icons.Outlined.Widgets,
+                                                imageVector = Icons.Default.Person,
                                                 contentDescription = null
                                             )
                                         },
                                         label = {
                                             Text(
-                                                text = stringResource(R.string.tab_features),
+                                                text = "Профиль",
                                                 style = MaterialTheme.typography.labelSmall
                                             )
                                         },
@@ -196,8 +217,11 @@ class MainActivity : ComponentActivity() {
                                         onStepCardClick = { showHourlyStepsChart.value = true }
                                     )
                                     1 -> HistoryScreen()
-                                    2 -> StatisticsScreen()
-                                    3 -> FeaturesScreen()
+                                    2 -> FeaturesScreen()
+                                    3 -> StatisticsScreen()
+                                    4 -> ProfileScreen(
+                                        onAchievementClick = { showAchievements.value = true }
+                                    )
                                 }
                             }
                         }
@@ -212,6 +236,20 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 HourlyStepsChartScreen(
                                     onBack = { showHourlyStepsChart.value = false }
+                                )
+                            }
+                        }
+
+                        if (showAchievements.value) {
+                            Dialog(
+                                onDismissRequest = { showAchievements.value = false },
+                                properties = DialogProperties(
+                                    usePlatformDefaultWidth = false,
+                                    decorFitsSystemWindows = false
+                                )
+                            ) {
+                                AchievementsScreen(
+                                    onBack = { showAchievements.value = false }
                                 )
                             }
                         }

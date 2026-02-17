@@ -237,4 +237,25 @@
     <!-- Map Dialog -->
     <string name="map_route_title">Карта маршрута</string>
     <string name="open_map">Открыть карту</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Профиль</string>
+    <string name="guest_user">Гость</string>
+    <string name="enter_name_hint">Введите имя</string>
+    <string name="total_steps">Всего шагов</string>
+    <string name="current_streak">Текущая серия</string>
+    <string name="longest_streak">Рекорд серии</string>
+    <string name="achievements">Достижения</string>
+    <string name="recent_achievements">Недавние достижения</string>
+    <string name="days">дней</string>
+
+    <!-- Achievement Categories -->
+    <string name="achievement_category_all">Все</string>
+    <string name="achievement_category_daily">Дни</string>
+    <string name="achievement_category_streak">Серии</string>
+    <string name="achievement_category_total">Всего</string>
+    <string name="achievement_category_special">Особые</string>
+    <string name="achievement_category_weekly">Еженедельные</string>
+    <string name="achievement_category_monthly">Ежемесячные</string>
+    <string name="achievement_category_milestone">Этапы</string>
 </resources>

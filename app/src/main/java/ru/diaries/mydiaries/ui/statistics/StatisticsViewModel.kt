@@ -7,14 +7,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.diaries.mydiaries.data.repository.UserProfileRepository
 import ru.diaries.mydiaries.domain.usecase.statistics.GetStatisticsDataUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    private val getStatisticsDataUseCase: GetStatisticsDataUseCase
+    private val getStatisticsDataUseCase: GetStatisticsDataUseCase,
+    private val userProfileRepository: UserProfileRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(StatisticsState())
@@ -29,19 +32,31 @@ class StatisticsViewModel @Inject constructor(
             is StatisticsIntent.LoadData -> loadData()
             is StatisticsIntent.OpenChart -> openChart(intent.type)
             is StatisticsIntent.CloseChart -> closeChart()
+            is StatisticsIntent.ShowAchievements -> showAchievements()
+            is StatisticsIntent.HideAchievements -> hideAchievements()
         }
     }
 
     private fun loadData() {
         viewModelScope.launch {
-            getStatisticsDataUseCase()
+            combine(
+                getStatisticsDataUseCase(),
+                userProfileRepository.getUserProfile()
+            ) { data, profile ->
+                val currentStreak = profile?.currentStreak ?: 0
+                val longestStreak = profile?.longestStreak ?: 0
+                StatisticsState(
+                    isLoading = false,
+                    statisticsData = data,
+                    currentStreak = currentStreak,
+                    longestStreak = longestStreak
+                )
+            }
                 .catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
-                .collect { data ->
-                    _state.update {
-                        it.copy(isLoading = false, statisticsData = data)
-                    }
+                .collect { newState ->
+                    _state.update { newState }
                 }
         }
     }
@@ -52,5 +67,13 @@ class StatisticsViewModel @Inject constructor(
 
     private fun closeChart() {
         _state.update { it.copy(openChart = null) }
+    }
+
+    private fun showAchievements() {
+        _state.update { it.copy(showAchievements = true) }
+    }
+
+    private fun hideAchievements() {
+        _state.update { it.copy(showAchievements = false) }
     }
 }

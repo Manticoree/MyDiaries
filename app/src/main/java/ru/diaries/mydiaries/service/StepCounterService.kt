@@ -28,6 +28,7 @@ import org.json.JSONObject
 import ru.diaries.mydiaries.MainActivity
 import ru.diaries.mydiaries.R
 import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
+import ru.diaries.mydiaries.domain.usecase.CheckAndUnlockAchievementsUseCase
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
@@ -37,6 +38,9 @@ class StepCounterService : Service(), SensorEventListener {
 
     @Inject
     lateinit var trackRepository: TrackRepository
+
+    @Inject
+    lateinit var checkAchievementsUseCase: CheckAndUnlockAchievementsUseCase
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var sensorManager: SensorManager
@@ -58,6 +62,7 @@ class StepCounterService : Service(), SensorEventListener {
         when (intent?.action) {
             ACTION_START -> startCounting()
             ACTION_STOP -> stopCounting()
+            ACTION_REFRESH -> refreshDayChange()
         }
         return START_STICKY
     }
@@ -125,6 +130,22 @@ class StepCounterService : Service(), SensorEventListener {
         stopSelf()
     }
 
+    /**
+     * Triggered at midnight to force day change detection.
+     * This ensures steps reset exactly at midnight even if the user is inactive.
+     */
+    private fun refreshDayChange() {
+        if (stepCounterSensor != null) {
+            // Force a sensor event check by checking current state
+            val now = LocalDate.now()
+            val totalStepsSinceBoot = initialStepCount
+
+            if (now != currentDate) {
+                handleDayChange(now, totalStepsSinceBoot)
+            }
+        }
+    }
+
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type != Sensor.TYPE_STEP_COUNTER) return
 
@@ -165,6 +186,15 @@ class StepCounterService : Service(), SensorEventListener {
         if (todayStepCount - lastPersistedSteps >= PERSIST_INTERVAL) {
             persistStepsToDb(todayStepCount)
             lastPersistedSteps = todayStepCount
+
+            // Check and unlock achievements
+            serviceScope.launch {
+                try {
+                    checkAchievementsUseCase()
+                } catch (_: Exception) {
+                    // Silently handle
+                }
+            }
         }
 
         // Update notification
@@ -367,6 +397,7 @@ class StepCounterService : Service(), SensorEventListener {
         const val ACTION_START = "ACTION_START_STEP_COUNTER"
         const val ACTION_STOP = "ACTION_STOP_STEP_COUNTER"
         const val ACTION_SHOW_STEPS_CHART = "ACTION_SHOW_STEPS_CHART"
+        const val ACTION_REFRESH = "ACTION_REFRESH_STEP_COUNTER"
 
         private const val CHANNEL_ID = "step_counter_channel"
         private const val CHANNEL_NAME = "Step Counter"

@@ -92,4 +92,5 @@ object UseCaseModule {
     ): GetStatisticsDataUseCase {
         return GetStatisticsDataUseCase(expenseRepository, foodRepository, trackRepository)
     }
+
 }

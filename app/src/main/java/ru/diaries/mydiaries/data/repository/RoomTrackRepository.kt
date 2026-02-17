@@ -2,6 +2,7 @@ package ru.diaries.mydiaries.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import ru.diaries.mydiaries.data.local.calculator.TrackStatsCalculator
 import ru.diaries.mydiaries.data.local.dao.TrackDao
 import ru.diaries.mydiaries.data.local.entity.DailyTrackEntity
 import ru.diaries.mydiaries.data.local.mapper.toDomain
@@ -12,7 +13,9 @@ import ru.diaries.mydiaries.feature.track.data.repository.TrackRepository
 import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class RoomTrackRepository @Inject constructor(
     private val trackDao: TrackDao
 ) : TrackRepository {
@@ -33,6 +36,13 @@ class RoomTrackRepository @Inject constructor(
                 it.toDomain(points)
             }
         }
+    }
+
+    override suspend fun getDailyTrack(date: LocalDate): DailyTrack? {
+        val dateStr = date.toString()
+        val entity = trackDao.getTrackByDate(dateStr) ?: return null
+        val points = trackDao.getPointsForTrack(entity.id)
+        return entity.toDomain(points)
     }
 
     override suspend fun addLocationPoint(date: LocalDate, point: LocationPoint) {

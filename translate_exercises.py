@@ -1,205 +1,40 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Скрипт для перевода упражнений с английского на русский язык
-Используйте словарь для замены общих терминов
-"""
-
 import json
-import sys
+import re
 
-# Словарь переводов общих терминов
-TRANSLATIONS = {
-    # Force types
-    "pull": "тянуть",
-    "push": "толкать",
-    "static": "статическое",
+# Load the exercises
+with open('feature/workout/src/main/assets/exercises.json', 'r', encoding='utf-8') as f:
+    exercises = json.load(f)
 
-    # Levels
-    "beginner": "начинающий",
-    "intermediate": "средний",
-    "expert": "эксперт",
+print(f"Total exercises: {len(exercises)}")
 
-    # Mechanics
-    "compound": "базовое",
-    "isolation": "изолирующее",
+# Count exercises with mixed English/Russian in instructions
+mixed_count = 0
+translated_count = 0
 
-    # Equipment
-    "body only": "собственный вес",
-    "machine": "тренажер",
-    "other": "другое",
-    "dumbbell": "гантели",
-    "barbell": "штанга",
-    "kettlebells": "гиря",
-    "cable": "кроссовер",
-    "bands": "резиновые петли",
-    "medicine ball": "медицинский мяч",
-    "exercise ball": "фитбол",
-    "foam roll": "пенный ролик",
+for i, exercise in enumerate(exercises):
+    instructions = exercise.get('instructions', [])
+    has_english = False
+    
+    # Check for English words in instructions
+    english_pattern = re.compile(r'\b(Lie|Stand|Grab|Place|Hold|Keep|Move|Start|Begin|Slowly|Make|Use|Push|Pull|Lift|Lower|Return|Pause|Bend|Straighten|Extend|Contract|Squeeze|Inhale|Exhale|Repeat|Twist|Rotate|Raise|Position|Weight|Resistance|Dumbbell|Barbell|Machine|Bench|Floor|Body|Feet|Hands|Arms|Legs|Knees|Shoulders|Back|Chest|Abs|Core|Muscles|Exercise|Movement|Perform|Complete|Continue|Switch|Side|Set|Rep|Time|Second|Minute|Step|Squat|Lunge|Press|Curl|Raise|Row|Flye|Deadlift|Clean|Snatch|Jerk|Swing|Kettlebell|Cable|Band|Ball|Medicine|Roller|Stretch|Pull|Push|Workout|Training|Technique|Form|Grip|Width|Distance|Angle|Direction|Opposite|Forward|Backward|Sideways|Up|Down|Out|In|Away|Towards|Until|While|As|After|Before|During|Through|Between|Above|Below|Over|Under|Across|Along|Around|Round|About|Against|Without|Within|Beside|Beyond|Near|Far|Close|Deep|Wide|Narrow|Long|Short|High|Low|Heavy|Light|Strong|Weak|Tight|Loose|Stable|Unstable|Balance|Control|Focus|Concentrate|Engage|Activate|Relax|Tense|Contract|Extend|Flex|Bend|Straighten|Rotate|Twist|Turn|Roll|Slide|Glide|Shift|Transfer|Move|Shift|Adjust|Align|Position|Place|Set|Arrange|Arrange|Organize|Prepare|Ready|Go|Start|Begin|Commence|Initiate|Launch|Execute|Perform|Do|Make|Create|Generate|Produce|Achieve|Accomplish|Complete|Finish|End|Stop|Halt|Pause|Rest|Recover|Restore|Return|Reset|Repeat|Cycle|Loop|Continue|Proceed|Advance|Progress|Improve|Enhance|Increase|Decrease|Reduce|Lower|Raise|Lift|Boost|Maximize|Minimize|Optimize|Perfect|Master|Learn|Practice|Train|Develop|Build|Strengthen|Tone|Shape|Form|Mold|Create|Design|Plan|Schedule|Organize|Manage|Control|Monitor|Track|Measure|Assess|Evaluate|Analyze|Review|Check|Test|Try|Attempt|Strive|Aim|Target|Goal|Objective|Purpose|Intent|Focus|Attention|Concentration|Awareness|Mindfulness|Presence|Engagement|Participation|Involvement|Commitment|Dedication|Discipline|Routine|Habit|Practice|Skill|Technique|Method|Strategy|Approach|Style|Way|Path|Route|Course|Direction|Journey|Process|Sequence|Order|Pattern|Rhythm|Tempo|Pace|Speed|Velocity|Rate|Frequency|Intensity|Volume|Load|Resistance|Force|Power|Energy|Strength|Endurance|Stamina|Capacity|Potential|Ability|Capability|Skill|Talent|Gift|Strength|Power|Might|Force|Energy|Vigor|Vitality|Life|Spirit|Soul|Mind|Body|Heart|Breath|Breathing|Respiration|Oxygen|Air|Atmosphere|Environment|Space|Room|Area|Zone|Region|Section|Part|Segment|Piece|Element|Component|Factor|Aspect|Feature|Characteristic|Quality|Attribute|Property|Trait|Nature|Essence|Core|Center|Heart|Soul|Spirit|Foundation|Basis|Ground|Base|Root|Origin|Source|Beginning|Start|End|Finish|Conclusion|Result|Outcome|Effect|Impact|Influence|Change|Transformation|Evolution|Development|Growth|Progress|Improvement|Enhancement|Advancement|Success|Achievement|Accomplishment|Victory|Triumph|Win|Gain|Profit|Benefit|Advantage|Reward|Prize|Award|Honor|Glory|Fame|Reputation|Status|Position|Rank|Level|Grade|Class|Category|Type|Kind|Sort|Variety|Species|Form|Shape|Structure|Pattern|Design|Layout|Arrangement|Organization|System|Method|Process|Procedure|Technique|Skill|Ability|Capacity|Capability|Power|Strength|Force|Energy|Vigor|Vitality|Life|Spirit|Soul|Mind|Body|Heart|Health|Fitness|Wellness|Well-being|Condition|State|Status|Situation|Circumstance|Context|Environment|Setting|Background|Scene|Stage|Platform|Base|Foundation|Basis|Ground|Root|Origin|Source|Beginning|Start|Initiation|Launch|Commencement|Opening|Introduction|Preview|Overview|Summary|Abstract|Outline|Framework|Structure|Skeleton|Backbone|Spine|Core|Center|Heart|Focus|Point|Spot|Place|Location|Position|Site|Area|Region|Zone|Territory|Domain|Field|Realm|Kingdom|Universe|World|Space|Time|Dimension|Aspect|Facet|Feature|Characteristic|Quality|Attribute|Property|Trait|Element|Component|Part|Piece|Segment|Section|Division|Portion|Share|Fraction|Percentage|Rate|Ratio|Proportion|Scale|Scope|Range|Extent|Degree|Level|Grade|Standard|Norm|Average|Mean|Median|Mode|Value|Worth|Merit|Significance|Importance|Relevance|Impact|Effect|Influence|Power|Authority|Control|Command|Rule|Law|Principle|Doctrine|Theory|Philosophy|Concept|Idea|Thought|Notion|Belief|Opinion|View|Perspective|Standpoint|Attitude|Approach|Method|Strategy|Plan|Scheme|Design|Pattern|Template|Model|Example|Sample|Specimen|Instance|Case|Situation|Scenario|Context|Background|History|Story|Tale|Legend|Myth|Fable|Parable|Allegory|Metaphor|Symbol|Sign|Mark|Token|Emblem|Badge|Crest|Seal|Stamp|Brand|Label|Tag|Title|Name|Designation|Title|Heading|Caption|Subtitle|Legend|Key|Code|Cipher|Password|Secret|Mystery|Puzzle|Riddle|Problem|Question|Issue|Matter|Topic|Subject|Theme|Point|Issue|Concern|Worry|Anxiety|Fear|Dread|Terror|Horror|Panic|Alarm|Shock|Surprise|Astonishment|Wonder|Awe|Admiration|Respect|Esteem|Honor|Dignity|Pride|Confidence|Trust|Faith|Hope|Optimism|Pessimism|Cynicism|Skepticism|Doubt|Uncertainty|Confusion|Perplexity|Bewilderment|Puzzlement|Mystery|Enigma|Riddle|Puzzle|Problem|Difficulty|Challenge|Obstacle|Barrier|Hurdle|Impediment|Obstruction|Blockage|Stop|Halt|Pause|Break|Interruption|Disruption|Disturbance|Interference|Obstacle|Barrier|Hindrance|Impediment|Difficulty|Hardship|Struggle|Effort|Work|Labor|Toil|Drudgery|Slog|Grind|Hustle|Bustle|Activity|Action|Movement|Motion|Change|Shift|Transition|Transformation|Conversion|Alteration|Modification|Adjustment|Adaptation|Evolution|Development|Growth|Progress|Advancement|Improvement|Enhancement|Betterment|Refinement|Perfection|Completion|Finishing|Ending|Termination|Conclusion|Closure|Stop|End|Finish|Close|Terminate|Conclude|Complete|Accomplish|Achieve|Succeed|Win|Triumph|Prevail|Overcome|Conquer|Defeat|Beat|Surpass|Exceed|Excel|Outperform|Outshine|Outdo|Better|Improve|Enhance|Upgrade|Update|Renew|Restore|Revive|Rejuvenate|Regenerate|Recreate|Reconstruct|Rebuild|Remake|Refashion|Redesign|Reshape|Remodel|Transform|Convert|Change|Alter|Modify|Adjust|Adapt|Fit|Suit|Match|Correspond|Align|Coordinate|Synchronize|Harmonize|Balance|Equalize|Level|Stabilize|Secure|Fasten|Attach|Connect|Link|Join|Unite|Combine|Merge|Blend|Mix|Fuse|Integrate|Incorporate|Include|Contain|Comprise|Consist|Constitute|Form|Make|Create|Build|Construct|Establish|Found|Institute|Organize|Arrange|Order|Structure|Systematize|Categorize|Classify|Sort|Group|Cluster|Collect|Gather|Assemble|Accumulate|Amass|Pile|Stack|Heap|Store|Save|Keep|Preserve|Maintain|Sustain|Support|Uphold|Defend|Protect|Guard|Shield|Shelter|Cover|Wrap|Enclose|Surround|Encircle|Ring|Border|Edge|Fringe|Rim|Margin|Border|Boundary|Limit|End|Finish|Conclusion|Termination|Completion|Accomplishment|Achievement|Success|Triumph|Victory|Win|Prize|Award|Reward|Honor|Glory|Fame|Renown|Reputation|Status|Position|Standing|Rank|Level|Grade|Class|Category|Type|Kind|Sort|Variety|Species|Form|Shape|Structure|Pattern|Design|Style|Fashion|Mode|Manner|Way|Method|Technique|Approach|Strategy|Plan|Scheme|Program|Project|Task|Job|Work|Duty|Responsibility|Obligation|Commitment|Promise|Vow|Oath|Pledge|Guarantee|Warranty|Assurance|Security|Safety|Protection|Defense|Guard|Shield|Cover|Shelter|Refuge|Sanctuary|Haven|Home|House|Residence|Abode|Dwelling|Place|Spot|Location|Site|Position|Situation|Setting|Scene|Stage|Platform|Base|Foundation|Ground|Earth|Land|Soil|Dirt|Dust|Sand|Gravel|Rock|Stone|Pebble|Boulder|Mountain|Hill|Valley|Canyon|Gorge|Ravine|Cliff|Precipice|Edge|Rim|Border|Boundary|Limit|End|Beginning|Start|Origin|Source|Root|Cause|Reason|Purpose|Goal|Aim|Objective|Target|Destination|终点|End|Finish|Close|Complete|Done|Finished|Over)\b', re.IGNORECASE)
+    
+    for instruction in instructions:
+        if english_pattern.search(instruction):
+            has_english = True
+            break
+    
+    if has_english:
+        mixed_count += 1
+        print(f"\n{'='*80}")
+        print(f"Exercise {i+1}: {exercise.get('name', 'Unknown')}")
+        print(f"Instructions have English words:")
+        for j, instruction in enumerate(instructions):
+            print(f"  {j+1}. {instruction}")
+    elif instructions and all(any(c.isalpha() for c in inst) for inst in instructions):
+        translated_count += 1
 
-    # Categories
-    "strength": "сила",
-    "stretching": "растяжка",
-    "plyometrics": "плиометрика",
-    "strongman": "стронгмен",
-    "powerlifting": "пауэрлифтинг",
-
-    # Muscles
-    "abdominals": "пресс",
-    "biceps": "бицепс",
-    "triceps": "трицепс",
-    "chest": "грудь",
-    "shoulders": "плечи",
-    "back": "спина",
-    "lats": "широчайшие",
-    "middle back": "средняя часть спины",
-    "lower back": "поясница",
-    "traps": "трапеция",
-    "forearms": "предплечья",
-    "quadriceps": "квадрицепс",
-    "hamstrings": "бицепс бедра",
-    "calves": "икры",
-    "glutes": "ягодицы",
-    "adductors": "приводящие мышцы",
-    "abductors": "отводящие мышцы",
-}
-
-# Перевод названий упражнений (примеры для демонстрации)
-EXERCISE_NAME_TRANSLATIONS = {
-    "3/4 Sit-Up": "3/4 Скручивание",
-    "90/90 Hamstring": "Растяжка бицепса бедра 90/90",
-    "Ab Crunch Machine": "Скручивание на тренажере",
-    "Ab Roller": "Гимнастический ролик",
-    "Adductor": "Пресс бедра на ролике",
-    "Adductor/Groin": "Растяжка приводящих мышц",
-    "Advanced Kettlebell Windmill": "Мельница с гирей (продвинутый)",
-    "Air Bike": "Велосипед",
-    "All Fours Quad Stretch": "Растяжка квадрицепса на четвереньках",
-    "Alternate Hammer Curl": "Чередующиеся молотковые сгибания",
-    "Alternate Heel Touchers": "Касания пяток",
-    "Alternate Incline Dumbbell Curl": "Чередующиеся сгибания на наклонной скамье",
-    "Alternate Leg Diagonal Bound": "Диагональные прыжки",
-    "Alternating Cable Shoulder Press": "Чередующиеся жимы плеч на блоке",
-    "Alternating Deltoid Raise": "Чередующиеся подъемы дельт",
-    "Alternating Floor Press": "Чередующиеся жимы с пола",
-    "Alternating Hang Clean": "Чередующиеся рывки с виса",
-    "Alternating Kettlebell Press": "Чередующиеся жимы гири",
-    "Alternating Kettlebell Row": "Чередующиеся тяги гири",
-    "Alternating Renegade Row": "Тяга в планке",
-    "Ankle Circles": "Круговые движения стопами",
-    "Ankle On The Knee": "Растяжка ягодиц",
-    "Anterior Tibialis-SMR": "Ролик для передней поверхности голени",
-    "Anti-Gravity Press": "Жим на наклонной скамье лицом вниз",
-    "Arm Circles": "Круговые движения руками",
-    "Arnold Dumbbell Press": "Жим Арнольда",
-    "Around The Worlds": "Мир вокруг",
-    "Atlas Stone Trainer": "Тренажер для камня Атласа",
-    "Atlas Stones": "Камень Атласа",
-    "Axle Deadlift": "Тяга с толстой штангой",
-    "Back Flyes - With Bands": "Разведение рук с эспандером",
-    "Backward Drag": "Тяга санок назад",
-    "Backward Medicine Ball Throw": "Бросок мяча назад",
-    "Balance Board": "Балансборд",
-    "Ball Leg Curl": "Сгибание ног на фитболе",
-    "Band Assisted Pull-Up": "Подтягивания с резиной",
-    "Band Good Morning": "Доброе утро с резиной",
-    "Band Good Morning (Pull Through)": "Протяжка с резиной",
-    "Band Hip Adductions": "Приведение бедра с резиной",
-    "Band Pull Apart": "Разведение рук с резиной",
-    "Band Skull Crusher": "Французский жим с резиной",
-    "Barbell Ab Rollout": "Ролик со штангой",
-    "Barbell Ab Rollout - On Knees": "Ролик со штангой с колен",
-    "Barbell Bench Press - Medium Grip": "Жим штанги средним хватом",
-    "Barbell Curl": "Сгибание штанги",
-    "Barbell Curls Lying Against An Incline": "Сгибание на наклонной скамье",
-    "Barbell Deadlift": "Становая тяга",
-    "Barbell Full Squat": "Глубокий присед",
-    "Barbell Glute Bridge": "Ягодичный мостик со штангой",
-    "Barbell Guillotine Bench Press": "Гильотинский жим",
-    "Barbell Hack Squat": "Хак-присед",
-    "Barbell Hip Thrust": "Тазовый мост со штангой",
-    "Barbell Incline Bench Press - Medium Grip": "Жим на наклонной скамье",
-    "Barbell Incline Shoulder Raise": "Подъем плеч на наклонной скамье",
-    "Barbell Lunge": "Выпады со штангой",
-    "Barbell Rear Delt Row": "Тяга к подбородку в наклоне",
-    "Barbell Rollout from Bench": "Ролик со скамьи",
-    "Barbell Seated Calf Raise": "Подъем на носки сидя со штангой",
-    "Barbell Shoulder Press": "Жим штанги стоя",
-    "Barbell Shrug": "Шраги со штангой",
-    "Barbell Shrug Behind The Back": "Шраги за спиной",
-    "Barbell Side Bend": "Наклоны в стороны со штангой",
-    "Barbell Side Split Squat": "Болгарский выпад",
-    "Barbell Squat": "Присед со штангой",
-    "Barbell Squat To A Bench": "Присед к скамье",
-    "Barbell Step Ups": "Заход на платформу",
-    "Barbell Walking Lunge": "Ходьба выпадами",
-    "Battling Ropes": "Боевые канаты",
-    "Bear Crawl Sled Drags": "Медвежья ходьба с санками",
-    "Behind Head Chest Stretch": "Растяжка груди за головой",
-    "Bench Dips": "Обратные отжимания",
-    "Bench Jump": "Прыжок через скамью",
-    "Bench Press - Powerlifting": "Жим лежа по пауэрлифтингу",
-    "Bench Press - With Bands": "Жим лежа с резиной",
-    "Bench Press with Chains": "Жим лежа с цепями",
-    "Bench Sprint": "Спринт на скамье",
-    "Bent-Arm Barbell Pullover": "Пуловер со штангой",
-}
-
-def translate_text(text):
-    """Переводит текст с использованием словаря"""
-    return TRANSLATIONS.get(text, text)
-
-def translate_exercise(exercise):
-    """Переводит одно упражнение"""
-    translated = exercise.copy()
-
-    # Перевод названия
-    if exercise["name"] in EXERCISE_NAME_TRANSLATIONS:
-        translated["name"] = EXERCISE_NAME_TRANSLATIONS[exercise["name"]]
-
-    # Перевод простых полей
-    for field in ["force", "level", "mechanic", "equipment", "category"]:
-        if translated.get(field):
-            translated[field] = translate_text(translated[field])
-
-    # Перевод мышц
-    if "primaryMuscles" in translated:
-        translated["primaryMuscles"] = [translate_text(m) for m in translated["primaryMuscles"]]
-
-    if "secondaryMuscles" in translated:
-        translated["secondaryMuscles"] = [translate_text(m) for m in translated["secondaryMuscles"]]
-
-    # Инструкции остаются на английском (требуют полного перевода)
-    # Для перевода инструкций используйте онлайн-переводчик
-
-    return translated
-
-def main():
-    if len(sys.argv) < 3:
-        print("Использование: python translate_exercises.py <входной_файл> <выходной_файл>")
-        print("Пример: python translate_exercises.py exercises.json exercises_ru.json")
-        sys.exit(1)
-
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
-
-    # Чтение исходного файла
-    print(f"Чтение файла: {input_file}")
-    with open(input_file, 'r', encoding='utf-8') as f:
-        exercises = json.load(f)
-
-    print(f"Всего упражнений: {len(exercises)}")
-
-    # Перевод упражнений
-    translated = [translate_exercise(ex) for ex in exercises]
-
-    # Сохранение переведенного файла
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(translated, f, ensure_ascii=False, indent=2)
-
-    print(f"Переведенный файл сохранен: {output_file}")
-    print(f"\nВНИМАНИЕ: Инструкции остались на английском языке.")
-    print("Для полного перевода инструкций используйте онлайн-переводчик.")
-
-if __name__ == "__main__":
-    main()
+print(f"\n{'='*80}")
+print(f"Summary:")
+print(f"  Total exercises: {len(exercises)}")
+print(f"  With mixed English/Russian: {mixed_count}")
+print(f"  Fully translated: {translated_count}")
