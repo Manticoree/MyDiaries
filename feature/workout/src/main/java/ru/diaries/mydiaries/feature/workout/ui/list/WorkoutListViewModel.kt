@@ -11,17 +11,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.diaries.mydiaries.feature.workout.data.model.Workout
 import ru.diaries.mydiaries.feature.workout.data.repository.WorkoutRepository
-import ru.diaries.mydiaries.feature.workout.domain.usecase.GenerateAiWorkoutUseCase
 import ru.diaries.mydiaries.feature.workout.domain.usecase.GetWorkoutProgramsUseCase
-import ru.diaries.mydiaries.feature.workout.domain.usecase.SaveWorkoutUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class WorkoutListViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
-    private val getWorkoutProgramsUseCase: GetWorkoutProgramsUseCase,
-    private val generateAiWorkoutUseCase: GenerateAiWorkoutUseCase,
-    private val saveWorkoutUseCase: SaveWorkoutUseCase
+    private val getWorkoutProgramsUseCase: GetWorkoutProgramsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WorkoutListState())
@@ -42,9 +38,6 @@ class WorkoutListViewModel @Inject constructor(
             is WorkoutListIntent.ShowAddWorkoutDialog -> showAddWorkoutDialog(null)
             is WorkoutListIntent.ShowAddWorkoutWithProgram -> showAddWorkoutDialog(intent.programId)
             is WorkoutListIntent.HideAddWorkoutDialog -> hideAddWorkoutDialog()
-            is WorkoutListIntent.GenerateAiWorkout -> generateAiWorkout()
-            is WorkoutListIntent.AcceptGeneratedWorkout -> acceptGeneratedWorkout()
-            is WorkoutListIntent.DismissGeneratedWorkout -> dismissGeneratedWorkout()
         }
     }
 
@@ -101,57 +94,5 @@ class WorkoutListViewModel @Inject constructor(
                 selectedProgramId = null
             )
         }
-    }
-
-    private fun generateAiWorkout() {
-        if (_state.value.isGenerating) return
-
-        _state.update { it.copy(isGenerating = true, generationError = null) }
-
-        viewModelScope.launch {
-            generateAiWorkoutUseCase()
-                .onSuccess { workout ->
-                    _state.update {
-                        it.copy(
-                            isGenerating = false,
-                            generatedWorkout = workout
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    val message = when {
-                        error.message?.contains("API key", ignoreCase = true) == true ||
-                        error.message?.contains("auth", ignoreCase = true) == true ->
-                            "API ключ Groq не настроен. Добавьте GROQ_API_KEY в local.properties"
-                        error.message?.contains("network", ignoreCase = true) == true ||
-                        error.message?.contains("connect", ignoreCase = true) == true ->
-                            "Нет подключения к сети"
-                        error.message?.contains("quota", ignoreCase = true) == true ||
-                        error.message?.contains("limit", ignoreCase = true) == true ->
-                            "Превышен лимит запросов. Попробуйте позже"
-                        else ->
-                            "Не удалось сгенерировать тренировку: ${error.message}"
-                    }
-                    _state.update {
-                        it.copy(
-                            isGenerating = false,
-                            generationError = message
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun acceptGeneratedWorkout() {
-        val workout = _state.value.generatedWorkout ?: return
-        _state.update { it.copy(generatedWorkout = null) }
-
-        viewModelScope.launch {
-            saveWorkoutUseCase(workout)
-        }
-    }
-
-    private fun dismissGeneratedWorkout() {
-        _state.update { it.copy(generatedWorkout = null, generationError = null) }
     }
 }

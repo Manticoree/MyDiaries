@@ -13,10 +13,7 @@ data class WorkoutListState(
     val showAddWorkoutDialog: Boolean = false,
     val addWorkoutDialogKey: String = "",
     val selectedProgramId: String? = null,
-    val activeWorkout: Workout? = null,
-    val isGenerating: Boolean = false,
-    val generatedWorkout: Workout? = null,
-    val generationError: String? = null
+    val activeWorkout: Workout? = null
 ) {
     val filteredWorkouts: List<Workout>
         get() = when (selectedFilter) {

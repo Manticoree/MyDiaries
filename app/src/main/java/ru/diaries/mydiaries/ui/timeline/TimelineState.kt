@@ -53,7 +53,23 @@ data class TimelineState(
 
     // Step counter
     val todaySteps: Int = 0,
-    val isStepCounterRunning: Boolean = false
+    val isStepCounterRunning: Boolean = false,
+
+    // Search and filters
+    val searchQuery: String = "",
+    val selectedFilterType: FilterType = FilterType.ALL,
+    val showSearchBar: Boolean = false
 ) {
     fun isCardExpanded(cardId: String): Boolean = cardExpandedStates[cardId] ?: true
+}
+
+enum class FilterType(val displayName: String) {
+    ALL("Все"),
+    DIARIES("Записи"),
+    EXPENSES("Расходы"),
+    TASKS("Задачи"),
+    VIDEOS("Видео"),
+    FOOD("Еда"),
+    WORKOUTS("Тренировки"),
+    TRACK("Треки")
 }

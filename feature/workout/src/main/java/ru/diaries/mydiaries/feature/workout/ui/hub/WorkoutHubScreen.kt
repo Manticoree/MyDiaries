@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
@@ -48,7 +47,6 @@ import ru.diaries.mydiaries.feature.workout.ui.browser.ExerciseBrowserScreen
 import ru.diaries.mydiaries.feature.workout.ui.list.WorkoutListScreen
 
 private val CoralOrange = Color(0xFFE8845C)
-private val DeepPurple = Color(0xFF7B68AE)
 private val CatalogBlue = Color(0xFF42A5F5)
 
 private enum class HubDestination {
@@ -104,15 +102,6 @@ fun WorkoutHubScreen(
                     subtitle = "История, программы, статистика",
                     icon = Icons.AutoMirrored.Outlined.List,
                     gradientColors = listOf(CoralOrange, CoralOrange.copy(alpha = 0.7f)),
-                    onClick = { currentDestination = HubDestination.MY_WORKOUTS }
-                )
-
-                // AI Workout
-                HubCard(
-                    title = "AI-тренировка",
-                    subtitle = "Генерация тренировки с помощью Gemini AI",
-                    icon = Icons.Default.AutoAwesome,
-                    gradientColors = listOf(DeepPurple, DeepPurple.copy(alpha = 0.7f)),
                     onClick = { currentDestination = HubDestination.MY_WORKOUTS }
                 )
 

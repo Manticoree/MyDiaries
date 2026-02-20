@@ -31,10 +31,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import ru.diaries.mydiaries.service.StepCounterService
@@ -49,13 +48,25 @@ import ru.diaries.mydiaries.ui.achievements.AchievementsScreen
 import ru.diaries.mydiaries.ui.theme.MyDiariesTheme
 import ru.diaries.mydiaries.ui.features.FeaturesScreen
 import ru.diaries.mydiaries.ui.timeline.TimelineScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import ru.diaries.mydiaries.ui.onboarding.OnboardingScreen
+import ru.diaries.mydiaries.data.PreferencesManager
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+
     private var keepSplashOnScreen = true
     private val showHourlyStepsChart = mutableStateOf(false)
     private val showAchievements = mutableStateOf(false)
+    private val showOnboarding = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen before super.onCreate
@@ -71,6 +82,18 @@ class MainActivity : ComponentActivity() {
                 var showSplash by rememberSaveable { mutableStateOf(true) }
                 var showPermissions by rememberSaveable {
                     mutableStateOf(!checkAllPermissionsGranted(this@MainActivity))
+                }
+
+                // Check if onboarding should be shown
+                val showOnboardingScreen by rememberSaveable(preferencesManager.isOnboardingCompleted) {
+                    mutableStateOf(!preferencesManager.isOnboardingCompleted)
+                }
+
+                // Set install date if not set
+                LaunchedEffect(Unit) {
+                    if (preferencesManager.installDate == 0L) {
+                        preferencesManager.installDate = System.currentTimeMillis()
+                    }
                 }
 
                 // Dismiss system splash screen when compose is ready
@@ -93,7 +116,17 @@ class MainActivity : ComponentActivity() {
                     enter = fadeIn(animationSpec = tween(500)),
                     exit = fadeOut()
                 ) {
-                    if (showPermissions) {
+                    // Show onboarding if not completed
+                    if (showOnboardingScreen) {
+                        OnboardingScreen(
+                            onGetStarted = {
+                                // Mark onboarding as completed
+                                preferencesManager.isOnboardingCompleted = true
+                            }
+                        )
+                    }
+                    // Show permissions if not granted
+                    else if (showPermissions) {
                         PermissionsScreen(
                             onAllPermissionsGranted = {
                                 showPermissions = false
@@ -253,6 +286,8 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
+
+
                     }
                 }
             }

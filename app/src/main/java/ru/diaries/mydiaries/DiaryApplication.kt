@@ -14,6 +14,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration as OsmConfig
+// Firebase - временно отключено до настройки google-services.json
+// import ru.diaries.mydiaries.analytics.CrashlyticsManager
+// import ru.diaries.mydiaries.analytics.FirebaseAnalyticsManager
+// import ru.diaries.mydiaries.analytics.RemoteConfigManager
 import ru.diaries.mydiaries.data.local.DiaryDatabase
 import ru.diaries.mydiaries.receiver.MidnightReceiver
 import ru.diaries.mydiaries.worker.StepResetWorker
@@ -39,6 +43,10 @@ class DiaryApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Firebase - временно отключено до настройки google-services.json
+        // Initialize Firebase services
+        // initializeFirebase()
 
         // Initialize database eagerly
         CoroutineScope(Dispatchers.IO).launch {

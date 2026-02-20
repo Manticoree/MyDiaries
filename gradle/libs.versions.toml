@@ -27,6 +27,16 @@ workManager = "2.9.1"
 hiltWork = "1.2.0"
 generativeai = "0.9.0"
 retrofit = "2.11.0"
+# Firebase - временно отключено до настройки google-services.json
+# firebaseBom = "33.9.0"
+mockk = "1.13.12"
+coroutinesTest = "1.9.0"
+turbine = "1.1.0"
+robolectric = "4.13"
+hiltTesting = "2.52"
+junit5 = "5.10.3"
+assertj = "3.26.0"
+paparazzi = "1.3.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -71,6 +81,17 @@ androidx-hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler",
 google-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltTesting" }
+assertj = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+# Firebase - временно отключено до настройки google-services.json
+# firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+# firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+# firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+# firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -79,4 +100,8 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
+# Firebase - временно отключено до настройки google-services.json
+# google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
+# firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.3" }
 

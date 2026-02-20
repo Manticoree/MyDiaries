@@ -258,4 +258,9 @@
     <string name="achievement_category_weekly">Еженедельные</string>
     <string name="achievement_category_monthly">Ежемесячные</string>
     <string name="achievement_category_milestone">Этапы</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Пропустить</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_get_started">Начать</string>
 </resources>

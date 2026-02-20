@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.diaries.mydiaries.data.model.UserProfile
+import ru.diaries.mydiaries.data.PreferencesManager
 import ru.diaries.mydiaries.data.repository.AchievementRepository
 import ru.diaries.mydiaries.data.repository.UserProfileRepository
 import javax.inject.Inject
@@ -17,15 +18,17 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userProfileRepository: UserProfileRepository,
-    private val achievementRepository: AchievementRepository
+    private val achievementRepository: AchievementRepository,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
+
+    init {
+        loadTheme()
+        handleIntent(ProfileIntent.LoadData)
+    }
 
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
-
-    init {
-        handleIntent(ProfileIntent.LoadData)
-    }
 
     fun handleIntent(intent: ProfileIntent) {
         when (intent) {
@@ -35,6 +38,9 @@ class ProfileViewModel @Inject constructor(
             is ProfileIntent.UpdateName -> updateName(intent.name)
             is ProfileIntent.SaveName -> saveName()
             is ProfileIntent.ShowProfile -> _state.update { it.copy(isEditingName = false) }
+            is ProfileIntent.ShowThemeDialog -> showThemeDialog()
+            is ProfileIntent.HideThemeDialog -> hideThemeDialog()
+            is ProfileIntent.SetTheme -> setTheme(intent.theme)
         }
     }
 
@@ -112,5 +118,22 @@ class ProfileViewModel @Inject constructor(
                 _state.update { it.copy(error = e.message) }
             }
         }
+    }
+
+    private fun loadTheme() {
+        _state.update { it.copy(selectedTheme = preferencesManager.appTheme) }
+    }
+
+    private fun showThemeDialog() {
+        _state.update { it.copy(showThemeDialog = true) }
+    }
+
+    private fun hideThemeDialog() {
+        _state.update { it.copy(showThemeDialog = false) }
+    }
+
+    private fun setTheme(theme: AppTheme) {
+        preferencesManager.appTheme = theme
+        _state.update { it.copy(selectedTheme = theme, showThemeDialog = false) }
     }
 }

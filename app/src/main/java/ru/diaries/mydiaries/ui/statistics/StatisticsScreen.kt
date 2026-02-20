@@ -45,6 +45,7 @@ import ru.diaries.mydiaries.ui.theme.InkBlue
 import ru.diaries.mydiaries.ui.theme.LavenderMist
 import ru.diaries.mydiaries.ui.theme.SageGreen
 import ru.diaries.mydiaries.ui.theme.GoldenHoney
+import ru.diaries.mydiaries.ui.achievements.AchievementsScreen
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -185,14 +186,17 @@ fun StatisticsScreen(
         }
     }
 
-    // Achievements Dialog
+    // Achievements Dialog (Full Screen)
     if (state.showAchievements) {
         Dialog(
             onDismissRequest = { viewModel.handleIntent(StatisticsIntent.HideAchievements) },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
         ) {
-            AchievementsDialog(
-                onClose = { viewModel.handleIntent(StatisticsIntent.HideAchievements) }
+            AchievementsScreen(
+                onBack = { viewModel.handleIntent(StatisticsIntent.HideAchievements) }
             )
         }
     }
@@ -252,68 +256,6 @@ fun StreakCard(
                 contentDescription = "View achievements",
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
-        }
-    }
-}
-
-@Composable
-fun AchievementsDialog(
-    onClose: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "🏆 Достижения",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    androidx.compose.material3.IconButton(onClick = onClose) {
-                        Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Default.Close,
-                            contentDescription = "Close"
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Полноэкранный экран достижений скоро будет доступен!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Тут вы сможете видеть все свои достижения и прогресс.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
         }
     }
 }

@@ -63,4 +63,9 @@ sealed class TimelineIntent {
     data class OpenTrackMap(val track: ru.diaries.mydiaries.feature.track.data.model.DailyTrack) : TimelineIntent()
     data object CloseTrackMap : TimelineIntent()
     data class DeleteTrack(val id: String) : TimelineIntent()
+
+    // Search and filters
+    data class UpdateSearchQuery(val query: String) : TimelineIntent()
+    data class SetFilterType(val filterType: FilterType) : TimelineIntent()
+    data object ToggleSearchBar : TimelineIntent()
 }

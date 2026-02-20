@@ -1,0 +1,213 @@
+package ru.diaries.mydiaries.ui.profile
+
+import app.cash.turbine.test
+import io.mockk.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import ru.diaries.mydiaries.data.model.Achievement
+import ru.diaries.mydiaries.data.model.UserProfile
+import ru.diaries.mydiaries.data.repository.AchievementRepository
+import ru.diaries.mydiaries.data.repository.UserProfileRepository
+import ru.diaries.mydiaries.data.PreferencesManager
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class ProfileViewModelTest {
+
+    private lateinit var viewModel: ProfileViewModel
+    private val userProfileRepository: UserProfileRepository = mockk()
+    private val achievementRepository: AchievementRepository = mockk()
+    private val preferencesManager: PreferencesManager = mockk()
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @Before
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+
+        // Mock preferences
+        every { preferencesManager.appTheme } returns AppTheme.SYSTEM
+        justRun { preferencesManager.appTheme = any() }
+
+        // Mock repository responses
+        val userProfile = UserProfile(
+            id = 1,
+            userName = "John Doe",
+            createdAt = System.currentTimeMillis(),
+            totalSteps = 10000,
+            currentStreak = 5,
+            longestStreak = 10
+        )
+        every { userProfileRepository.getUserProfile() } returns flowOf(userProfile)
+        every { achievementRepository.getUnlockedAchievements() } returns flowOf(emptyList<Achievement>())
+
+        viewModel = ProfileViewModel(userProfileRepository, achievementRepository, preferencesManager)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `initial state has correct default values`() {
+        // Assert
+        val initialState = viewModel.state.value
+        assertThat(initialState.isLoading).isFalse()
+        assertThat(initialState.userProfile).isNotNull()
+        assertThat(initialState.isEditingName).isFalse()
+        assertThat(initialState.selectedTheme).isEqualTo(AppTheme.SYSTEM)
+    }
+
+    @Test
+    fun `LoadData intent loads profile data correctly`() = runTest {
+        // Arrange
+        val userProfile = UserProfile(
+            id = 1,
+            userName = "Test User",
+            createdAt = System.currentTimeMillis(),
+            totalSteps = 5000,
+            currentStreak = 3,
+            longestStreak = 7
+        )
+
+        every { userProfileRepository.getUserProfile() } returns flowOf(userProfile)
+        every { achievementRepository.getUnlockedAchievements() } returns flowOf(emptyList())
+
+        // Recreate ViewModel to trigger loadData
+        viewModel = ProfileViewModel(userProfileRepository, achievementRepository, preferencesManager)
+
+        // Assert
+        viewModel.state.test {
+            val state = awaitItem()
+            assertThat(state.userProfile?.userName).isEqualTo("Test User")
+            assertThat(state.userProfile?.totalSteps).isEqualTo(5000)
+            assertThat(state.userProfile?.currentStreak).isEqualTo(3)
+            assertThat(state.userProfile?.longestStreak).isEqualTo(7)
+            assertThat(state.isLoading).isFalse()
+        }
+    }
+
+    @Test
+    fun `LoadData handles null profile gracefully`() = runTest {
+        // Arrange
+        coEvery { userProfileRepository.getUserProfile() } returns flowOf(null)
+        coEvery { achievementRepository.getUnlockedAchievements() } returns flowOf(emptyList())
+
+        // Recreate ViewModel
+        viewModel = ProfileViewModel(userProfileRepository, achievementRepository, preferencesManager)
+
+        // Assert
+        viewModel.state.test {
+            val state = awaitItem()
+            assertThat(state.userProfile).isNull()
+            assertThat(state.isLoading).isFalse()
+        }
+    }
+
+    @Test
+    fun `ShowThemeDialog updates state correctly`() {
+        // Arrange
+        val initialState = viewModel.state.value
+        assertThat(initialState.showThemeDialog).isFalse()
+
+        // Act
+        viewModel.handleIntent(ProfileIntent.ShowThemeDialog)
+
+        // Assert
+        val newState = viewModel.state.value
+        assertThat(newState.showThemeDialog).isTrue()
+    }
+
+    @Test
+    fun `HideThemeDialog updates state correctly`() {
+        // Arrange
+        viewModel.handleIntent(ProfileIntent.ShowThemeDialog)
+        assertThat(viewModel.state.value.showThemeDialog).isTrue()
+
+        // Act
+        viewModel.handleIntent(ProfileIntent.HideThemeDialog)
+
+        // Assert
+        assertThat(viewModel.state.value.showThemeDialog).isFalse()
+    }
+
+    @Test
+    fun `SetTheme updates theme in state and calls preferences`() = runTest {
+        // Act
+        viewModel.handleIntent(ProfileIntent.SetTheme(AppTheme.DARK))
+
+        // Assert
+        val newState = viewModel.state.value
+        assertThat(newState.selectedTheme).isEqualTo(AppTheme.DARK)
+        verify { preferencesManager.appTheme = AppTheme.DARK }
+    }
+
+    @Test
+    fun `StartEditingName updates state correctly`() {
+        // Arrange
+        val userProfile = UserProfile(
+            id = 1,
+            userName = "Original Name",
+            createdAt = System.currentTimeMillis()
+        )
+        every { userProfileRepository.getUserProfile() } returns flowOf(userProfile)
+        every { achievementRepository.getUnlockedAchievements() } returns flowOf(emptyList())
+        viewModel = ProfileViewModel(userProfileRepository, achievementRepository, preferencesManager)
+
+        // Act
+        viewModel.handleIntent(ProfileIntent.StartEditingName)
+
+        // Assert
+        val newState = viewModel.state.value
+        assertThat(newState.isEditingName).isTrue()
+        assertThat(newState.newUserName).isEqualTo("Original Name")
+    }
+
+    @Test
+    fun `CancelEditingName updates state correctly`() {
+        // Arrange
+        viewModel.handleIntent(ProfileIntent.StartEditingName)
+        assertThat(viewModel.state.value.isEditingName).isTrue()
+
+        // Act
+        viewModel.handleIntent(ProfileIntent.CancelEditingName)
+
+        // Assert
+        val newState = viewModel.state.value
+        assertThat(newState.isEditingName).isFalse()
+        assertThat(newState.newUserName).isEmpty()
+    }
+
+    @Test
+    fun `UpdateName updates newUserName in state`() {
+        // Arrange
+        val initialName = viewModel.state.value.newUserName
+
+        // Act
+        viewModel.handleIntent(ProfileIntent.UpdateName("New User Name"))
+
+        // Assert
+        val newState = viewModel.state.value
+        assertThat(newState.newUserName).isEqualTo("New User Name")
+    }
+
+    @Test
+    fun `ShowProfile sets isEditingName to false`() {
+        // Arrange
+        viewModel.handleIntent(ProfileIntent.StartEditingName)
+        assertThat(viewModel.state.value.isEditingName).isTrue()
+
+        // Act
+        viewModel.handleIntent(ProfileIntent.ShowProfile)
+
+        // Assert
+        val newState = viewModel.state.value
+        assertThat(newState.isEditingName).isFalse()
+    }
+}

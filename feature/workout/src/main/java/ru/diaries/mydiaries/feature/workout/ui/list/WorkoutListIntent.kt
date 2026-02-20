@@ -11,7 +11,4 @@ sealed class WorkoutListIntent {
     data object ShowAddWorkoutDialog : WorkoutListIntent()
     data class ShowAddWorkoutWithProgram(val programId: String) : WorkoutListIntent()
     data object HideAddWorkoutDialog : WorkoutListIntent()
-    data object GenerateAiWorkout : WorkoutListIntent()
-    data object AcceptGeneratedWorkout : WorkoutListIntent()
-    data object DismissGeneratedWorkout : WorkoutListIntent()
 }

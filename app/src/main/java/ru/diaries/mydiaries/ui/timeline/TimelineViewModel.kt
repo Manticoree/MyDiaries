@@ -129,6 +129,10 @@ class TimelineViewModel @Inject constructor(
             is TimelineIntent.OpenTrackMap -> openTrackMap(intent.track)
             is TimelineIntent.CloseTrackMap -> closeTrackMap()
             is TimelineIntent.DeleteTrack -> deleteTrack(intent.id)
+
+            is TimelineIntent.UpdateSearchQuery -> updateSearchQuery(intent.query)
+            is TimelineIntent.SetFilterType -> setFilterType(intent.filterType)
+            is TimelineIntent.ToggleSearchBar -> toggleSearchBar()
         }
     }
 
@@ -139,11 +143,20 @@ class TimelineViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
                 .collect { data ->
-                    val grouped = groupItemsByDate(data.entries, data.expenses, data.tasks, data.videos, data.foodEntries, data.tracks, data.workouts)
+                    val grouped = groupItemsByDate(
+                        entries = data.entries,
+                        expenses = data.expenses,
+                        tasks = data.tasks,
+                        videos = data.videos,
+                        foodEntries = data.foodEntries,
+                        tracks = data.tracks,
+                        workouts = data.workouts
+                    )
+                    val filteredGrouped = filterAndSearch(grouped)
                     _state.update {
                         it.copy(
                             entries = data.entries,
-                            groupedEntries = grouped,
+                            groupedEntries = filteredGrouped,
                             todayExpenses = data.todayExpenses,
                             todayTasks = data.todayTasks,
                             todayVideos = data.todayVideos,
@@ -439,5 +452,76 @@ class TimelineViewModel @Inject constructor(
 
     private fun closeWorkoutList() {
         _state.update { it.copy(showWorkoutListScreen = false) }
+    }
+
+    // Search and filters
+    private fun updateSearchQuery(query: String) {
+        _state.update { it.copy(searchQuery = query) }
+        refreshFilteredData()
+    }
+
+    private fun setFilterType(filterType: FilterType) {
+        _state.update { it.copy(selectedFilterType = filterType) }
+        refreshFilteredData()
+    }
+
+    private fun toggleSearchBar() {
+        _state.update { it.copy(showSearchBar = !it.showSearchBar) }
+    }
+
+    private fun filterAndSearch(groups: List<DateGroup>): List<DateGroup> {
+        return groups.mapNotNull { group ->
+            val filteredItems = group.items.filter { item ->
+                // Apply type filter
+                val matchesType = when (_state.value.selectedFilterType) {
+                    FilterType.ALL -> true
+                    FilterType.DIARIES -> item is TimelineItem.DiaryItem
+                    FilterType.EXPENSES -> item is TimelineItem.ExpensesItem
+                    FilterType.TASKS -> item is TimelineItem.TasksItem
+                    FilterType.VIDEOS -> item is TimelineItem.VideosItem
+                    FilterType.FOOD -> item is TimelineItem.FoodItem
+                    FilterType.WORKOUTS -> item is TimelineItem.WorkoutItem
+                    FilterType.TRACK -> item is TimelineItem.TrackItem
+                }
+
+                // Apply search query
+                val matchesSearch = _state.value.searchQuery.isBlank() ||
+                    when (item) {
+                        is TimelineItem.DiaryItem -> item.entry.title.contains(_state.value.searchQuery, ignoreCase = true) ||
+                            item.entry.content.contains(_state.value.searchQuery, ignoreCase = true)
+                        is TimelineItem.ExpensesItem -> item.expenses.any { expense ->
+                            expense.description.contains(_state.value.searchQuery, ignoreCase = true) ||
+                            expense.category.toString().contains(_state.value.searchQuery, ignoreCase = true)
+                        }
+                        is TimelineItem.TasksItem -> item.tasks.any { it.title.contains(_state.value.searchQuery, ignoreCase = true) }
+                        is TimelineItem.VideosItem -> item.videos.any { video ->
+                            video.title?.contains(_state.value.searchQuery, ignoreCase = true) == true
+                        }
+                        is TimelineItem.FoodItem -> item.foodEntries.any { entry ->
+                            entry.foodName.contains(_state.value.searchQuery, ignoreCase = true) ||
+                            entry.displayName.contains(_state.value.searchQuery, ignoreCase = true)
+                        }
+                        is TimelineItem.WorkoutItem -> item.workouts.any { workout ->
+                            workout.name.contains(_state.value.searchQuery, ignoreCase = true) ||
+                            workout.notes.contains(_state.value.searchQuery, ignoreCase = true)
+                        }
+                        is TimelineItem.TrackItem -> item.track.distanceMeters.toString().contains(_state.value.searchQuery)
+                    }
+
+                matchesType && matchesSearch
+            }
+
+            if (filteredItems.isEmpty()) {
+                null
+            } else {
+                group.copy(items = filteredItems)
+            }
+        }
+    }
+
+    private fun refreshFilteredData() {
+        val currentState = _state.value
+        val filteredGrouped = filterAndSearch(currentState.groupedEntries)
+        _state.update { it.copy(groupedEntries = filteredGrouped) }
     }
 }
